@@ -26,3 +26,4 @@ def test_experiment_setup():
     exp.add_population(ipsi_pop)
     exp.add_population(contra_pop)
     exp.add_electrodes(electrodes)
+    exp.run()
