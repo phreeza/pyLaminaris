@@ -1,5 +1,5 @@
 def test_tree_instances():
-    import pyLaminaris.tree
-    s = pyLaminaris.tree.Segment()
-    t = pyLaminaris.tree.Tree()
-    p = pyLaminaris.tree.ProbTree()
+    import pyLaminaris.axon
+    s = pyLaminaris.axon.Segment()
+    t = pyLaminaris.axon.Tree()
+    p = pyLaminaris.axon.ProbTree()

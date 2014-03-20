@@ -15,13 +15,13 @@ def _rotation(theta):
     return R
 
 
-def _gather_rec(seg):
+def _gather_recursive(seg):
     if len(seg.children) == 0:
         return [seg]
     else:
         ret = [seg]
         for c in seg.children:
-            ret.extend(_gather_rec(c))
+            ret.extend(_gather_recursive(c))
         return ret
 
 
@@ -149,7 +149,7 @@ class Tree:
                 s.add_branch()
 
     def segments(self):
-        return _gather_rec(self.root)
+        return _gather_recursive(self.root)
 
     def spatial_layout(self):
         bif = []
