@@ -1,7 +1,7 @@
 import numpy as np
 import neuron
 
-neuron.load_mechanisms('/home/mccolgan/work/owls/axon_lfp/')
+neuron.load_mechanisms('neuron')
 from neuron import h
 
 
