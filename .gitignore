@@ -3,3 +3,4 @@
 *.png
 neuron/x86_64/
 .idea
+apidoc/_*
