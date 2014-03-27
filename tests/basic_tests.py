@@ -18,8 +18,8 @@ def test_experiment_setup():
     import pyLaminaris.recording
 
     exp = pyLaminaris.experiment.Experiment()
-    ipsi_pop = pops.NMNeuronPopulation(side='ipsi')
-    contra_pop = pops.NMNeuronPopulation(side='contra')
+    ipsi_pop = pops.NMNeuronPopulation(side='ipsi', size=5)
+    contra_pop = pops.NMNeuronPopulation(side='contra', size=5)
     electrodes = pyLaminaris.recording.ElectrodeArray()
     ipsi_pop.set_stimulation(stimtype='click', freq=4000.)
     contra_pop.set_stimulation(stimtype='click', freq=4000.)
