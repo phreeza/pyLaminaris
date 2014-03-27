@@ -33,7 +33,7 @@ class Experiment:
             imem.append(imem_n)
             iloc.append(iloc_n)
 
-        imem, iloc = np.hstack(imem), np.hstack(iloc)
+        imem, iloc = np.vstack(imem), np.vstack(iloc)
         for e in self.electrodes:
-            e.calc_fields(imem, iloc)
+            e.calc_fields(iloc, imem)
 

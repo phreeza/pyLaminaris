@@ -5,12 +5,12 @@ import numpy as np
 class Electrode:
     def __init__(self, location):
         self.location = location
-        self.recorded_potential = np.array()
+        self.recorded_potential = np.array([])
 
 
-    def calc_kernels_3d(self,
-                        node_locs, node_imem,
-                        conductivity=1. / (330. * 1e4)):  #conductivity in ohm*um
+    def calc_fields(self,
+                    node_locs, node_imem,
+                    conductivity=1. / (330. * 1e4)):  #conductivity in ohm*um
         ret = np.zeros(node_imem.shape[1])
         for j, xl in enumerate(node_locs):
             ret[:] += (
