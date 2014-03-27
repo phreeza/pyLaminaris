@@ -23,4 +23,15 @@ class NMNeuronPopulation:
 
         for n in self.neurons:
             n.set_spiketimes(helper.inhom_poisson(mod_click, 20., 0., 6.))
-        pass
+
+    def nodes_imem_loc(self):
+        imem = []
+        iloc = []
+        for n in self.neurons:
+            imem_n, iloc_n = n.nodes_imem_loc()
+            imem.append(imem_n)
+            iloc.append(iloc_n)
+
+        return np.hstack(imem), np.hstack(iloc)
+
+

@@ -19,13 +19,21 @@ class Experiment:
     def run(self):
         from neuron import h
         import neuron
+        import numpy as np
 
         h.celsius = 40.
         h.dt = 0.0025
         h.finitialize(-75)
         neuron.init()
         neuron.run(5)
-        imem, iloc =
+        imem = []
+        iloc = []
+        for p in self.populations:
+            imem_n, iloc_n = p.nodes_imem_loc()
+            imem.append(imem_n)
+            iloc.append(iloc_n)
+
+        imem, iloc = np.hstack(imem), np.hstack(iloc)
         for e in self.electrodes:
-            e.calc_fields()
+            e.calc_fields(imem, iloc)
 

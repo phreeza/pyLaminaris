@@ -21,3 +21,6 @@ class NMNeuron:
             stim.amp = 1.
             stim.dur = 0.1
             self.stims.append(stim)
+
+    def nodes_imem_loc(self):
+        return self.axon.nodes_imem_loc()
