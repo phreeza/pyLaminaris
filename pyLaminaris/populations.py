@@ -4,7 +4,7 @@ import numpy as np
 
 
 class NMNeuronPopulation:
-    def __init__(self,size=100,side='ipsi'):
+    def __init__(self, size=100, side='ipsi'):
         self.side = side
         self.size = size
         x_offset = 4500.

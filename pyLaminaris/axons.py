@@ -182,24 +182,6 @@ class Tree:
 
         return np.array(imem), np.array(loc)
 
-    def run_sim(self):
-        if not self.virgin:
-            print "warning, rerunning simulation on non-virgin tree"
-        stims = []
-        for d in self.delay:
-            stim = h.IClamp(self.root.nodes[0](0.5))
-            # Setting up stimulation
-            stim.delay = d
-            stim.amp = 1.
-            stim.dur = 0.1
-            stims.append(stim)
-        h.celsius = 40.
-        h.dt = 0.0025
-        h.finitialize(-75)
-        neuron.init()
-        neuron.run(20)
-        self.virgin = False
-
     def draw_2d(self):
         from matplotlib import pyplot as plt
         import numpy as np
@@ -212,20 +194,6 @@ class Tree:
             plt.plot(n[:, 0], n[:, 1], 'k.')
 
         plt.gca().set_aspect('equal')
-
-    def calc_fields(self, x=3000., y=400., z=0.):
-        assert not self.virgin, "need to run simulation first"
-        import calc_lfp
-        import numpy as np
-
-        imem, loc = self.nodes_imem_loc()
-        if type(x) is float:
-            x = np.array([x])
-        sample_loc = np.vstack([x,
-                                y * np.ones(x.shape),
-                                z * np.ones(x.shape)]).T
-
-        return calc_lfp.calc_kernels_3d(loc, imem, sample_loc)
 
 
 class ProbTree(Tree):

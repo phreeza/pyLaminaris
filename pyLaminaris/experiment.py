@@ -3,17 +3,29 @@ __author__ = 'mccolgan'
 
 class Experiment:
     def __init__(self):
-        pass
+        self.populations = []
+        self.electrodes = []
 
     def add_electrode(self, electrode):
-        pass
+        self.electrodes.append(electrode)
 
     def add_electrodes(self, electrodes):
         for e in electrodes.get_electrode_list():
             self.add_electrode(e)
 
     def add_population(self, population):
-        pass
+        self.populations.append(population)
 
     def run(self):
-        pass
+        from neuron import h
+        import neuron
+
+        h.celsius = 40.
+        h.dt = 0.0025
+        h.finitialize(-75)
+        neuron.init()
+        neuron.run(5)
+        imem, iloc =
+        for e in self.electrodes:
+            e.calc_fields()
+

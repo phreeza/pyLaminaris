@@ -9,7 +9,7 @@ def test_axons_instances():
 def test_populations_instances():
     import pyLaminaris.populations as pops
 
-    mypop = pops.NMNeuronPopulation()
+    mypop = pops.NMNeuronPopulation(size=2)
 
 
 def test_experiment_setup():
