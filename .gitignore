@@ -6,3 +6,5 @@ neuron/x86_64/
 apidoc/_*
 .coverage
 .doit.db
+data/
+figs/
