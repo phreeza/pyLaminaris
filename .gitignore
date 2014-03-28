@@ -5,3 +5,4 @@ neuron/x86_64/
 .idea
 apidoc/_*
 .coverage
+.doit.db
