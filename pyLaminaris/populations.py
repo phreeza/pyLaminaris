@@ -7,9 +7,10 @@ class NMNeuronPopulation:
     def __init__(self, size=100, side='ipsi'):
         self.side = side
         self.size = size
-        x_offset = 4500.
-        x_spread = 200.
-        self.neurons = [neurons.NMNeuron(root_point=x_offset + x_spread * np.random.rand()) for n in range(size)]
+        self.x_offset = 4500.
+        self.x_spread = 200.
+        self.neurons = [neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand()) for n in
+                        range(size)]
 
     def set_stimulation(self, stimtype='mod_click', freq=4000.):
         #TODO: make this take more than a single stimtype
@@ -31,5 +32,7 @@ class NMNeuronPopulation:
             imem_n, iloc_n = n.nodes_imem_loc()
             imem.append(imem_n)
             iloc.append(iloc_n)
-
-        return np.vstack(imem), np.vstack(iloc)
+        imem, iloc = np.vstack(imem), np.vstack(iloc)
+        if self.side == 'contra':
+            iloc[:, 0] = 2 * self.x_offset - iloc[:, 0]
+        return imem, iloc

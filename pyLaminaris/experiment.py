@@ -20,7 +20,7 @@ class Experiment:
     def add_neuron(self, neuron):
         self.neurons.append(neuron)
 
-    def run(self):
+    def run(self, t=20):
         from neuron import h
         import neuron
         import numpy as np
@@ -29,7 +29,7 @@ class Experiment:
         h.dt = 0.0025
         h.finitialize(-75)
         neuron.init()
-        neuron.run(5)
+        neuron.run(t)
         imem = []
         iloc = []
         for p in self.populations:
