@@ -33,5 +33,3 @@ class NMNeuronPopulation:
             iloc.append(iloc_n)
 
         return np.vstack(imem), np.vstack(iloc)
-
-

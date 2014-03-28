@@ -36,6 +36,7 @@ class Experiment:
             imem_n, iloc_n = p.nodes_imem_loc()
             imem.append(imem_n)
             iloc.append(iloc_n)
+
         for n in self.neurons:
             imem_n, iloc_n = n.nodes_imem_loc()
             imem.append(imem_n)
