@@ -4,6 +4,7 @@ __author__ = 'mccolgan'
 class Experiment:
     def __init__(self):
         self.populations = []
+        self.neurons = []
         self.electrodes = []
 
     def add_electrode(self, electrode):
@@ -15,6 +16,9 @@ class Experiment:
 
     def add_population(self, population):
         self.populations.append(population)
+
+    def add_neuron(self, neuron):
+        self.neurons.append(neuron)
 
     def run(self):
         from neuron import h
@@ -30,6 +34,10 @@ class Experiment:
         iloc = []
         for p in self.populations:
             imem_n, iloc_n = p.nodes_imem_loc()
+            imem.append(imem_n)
+            iloc.append(iloc_n)
+        for n in self.neurons:
+            imem_n, iloc_n = n.nodes_imem_loc()
             imem.append(imem_n)
             iloc.append(iloc_n)
 
