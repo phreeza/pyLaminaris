@@ -11,13 +11,13 @@ def task_simple_binaural_click():
     yield {
         'name': 'calc',
         'actions': [(c.run,)],
-        'targets': [""],
-        'file_dep': ["script/psth_isih_from_txt.py"]
+        'targets': ['data/simple_binaural_click_fields.npz'],
+        'file_dep': ["bin/simple_binaural_click_calc.py"]
     }
 
     yield {
         'name': 'plot',
         'actions': [(p.run,)],
-        'targets': [""],
-        'file_dep': ["script/psth_isih_from_txt.py"]
+        'targets': ["figs/simple_binaural_click.png", "figs/simple_binaural_click.pdf"],
+        'file_dep': ["bin/simple_binaural_click_plot.py", "data/simple_binaural_click_fields.npz"]
     }

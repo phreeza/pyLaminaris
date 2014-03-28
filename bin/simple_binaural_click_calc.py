@@ -18,6 +18,6 @@ def run():
     exp.add_population(contra_pop)
     exp.add_electrode(electrode)
 
-    exp.run(t=1.)
+    exp.run(t=20)
 
     np.savez('data/simple_binaural_click_fields', recorded_potentials=electrode.recorded_potential)
