@@ -3,22 +3,32 @@ import numpy as np
 
 
 class Electrode:
-    def __init__(self, location):
+    def __init__(self, location, node_locs=None):
         self.location = location
         self.recorded_potential = np.array([])
-
+        if node_locs is not None:
+            self.build_dist_coeffs(node_locs)
+        else:
+            self.dist_coeffs = None
 
     def calc_fields(self,
                     node_locs, node_imem,
                     conductivity=1. / (330. * 1e4)):  #conductivity in ohm*um
-        ret = np.zeros(node_imem.shape[1])
+        #TODO make node_locs argument optional
+        if self.dist_coeffs is None:
+            self.build_dist_coeffs(node_locs)
+
+        ret = np.dot(node_imem.T, self.dist_coeffs) / conductivity
+        self.recorded_potential = ret
+
+    def build_dist_coeffs(self, node_locs):
+        self.dist_coeffs = np.zeros(node_locs.shape)
         for j, xl in enumerate(node_locs):
-            ret[:] += (
-                node_imem[j, :] / (
-                    4. * np.pi * conductivity * np.sqrt(np.sum((xl - self.location) * (xl - self.location)))
+            self.dist_coeffs[j] = (
+                1. / (
+                    4. * np.pi * np.sqrt(np.sum((xl - self.location) * (xl - self.location)))
                 )
             )
-        self.recorded_potential = ret
 
 
 class ElectrodeArray:
