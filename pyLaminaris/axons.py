@@ -57,9 +57,10 @@ class Segment:
 
         self._sections_setup()
 
-        self.rec_i_mem = [h.Vector() for i in range(nnode)]
-        [self.rec_i_mem[i].record(self.nodes[i](0.5)._ref_i_membrane)
-         for i in range(nnode)]
+        if self.record:
+            self.rec_i_mem = [h.Vector() for i in range(nnode)]
+            [self.rec_i_mem[i].record(self.nodes[i](0.5)._ref_i_membrane)
+             for i in range(nnode)]
 
         self.node_locations = [self.start + (n + 1.) / nnode * (self.end - self.start)
                                for n in range(nnode)]
@@ -179,7 +180,12 @@ class Tree:
         imem = []
         loc = []
         for s in segs:
-            imem.extend(s.rec_i_mem)
+            #TODO: here is where we need to differentiate record or not.
+            #FIXME: Should be failing a test!!!!
+            if s.record:
+                imem.extend(s.rec_i_mem)
+            else:
+                raise NotImplementedError
             loc.extend(s.node_locations)
         imem = [np.array(i) for i in imem]
 
@@ -207,7 +213,7 @@ class ProbTree(Tree):
             self.record = kwargs['record']
             kwargs.pop('record')
         else:
-            self.record = False
+            self.record = True
 
         if 'structure' in kwargs.keys():
             structure = kwargs['structure']
