@@ -27,9 +27,11 @@ def _gather_recursive(seg):
 
 class Segment:
     def __init__(self, parent=None, node_pitch=77.,
-                 start=np.array([0., 0., 0.]), end=np.array([3 * 77., 0., 0.])):
+                 start=np.array([0., 0., 0.]), end=np.array([3 * 77., 0., 0.]), record=True):
 
         nnode = int(np.ceil(np.linalg.norm(end - start) / node_pitch))
+
+        self.record = record
 
         if parent is None:
             self.order = 0
@@ -70,9 +72,9 @@ class Segment:
         if direction.shape[0] == 3:
             direction = np.vstack((direction, direction))
         self.children.append(
-            Segment(self, start=self.end, end=self.end + np.dot(direction[0, :], R1)))
+            Segment(self, start=self.end, end=self.end + np.dot(direction[0, :], R1), record=self.record))
         self.children.append(
-            Segment(self, start=self.end, end=self.end + np.dot(direction[1, :], R2)))
+            Segment(self, start=self.end, end=self.end + np.dot(direction[1, :], R2), record=self.record))
 
     def _sections_setup(self):
         L_myelin = 75.
@@ -134,8 +136,9 @@ class Segment:
 
 
 class Tree:
-    def __init__(self, depth=5, root_point=np.array([3000., 0., 0.])):
-        self.root = Segment(end=root_point)
+    def __init__(self, depth=5, root_point=np.array([3000., 0., 0.]), record=True):
+        self.record = record
+        self.root = Segment(end=root_point, record=record)
         self.build_deterministic(depth)
         self.virgin = True
         self.delay = [1.]
@@ -200,6 +203,12 @@ class ProbTree(Tree):
     def __init__(self, **kwargs):
         from scipy import stats
 
+        if 'record' in kwargs.keys():
+            self.record = kwargs['record']
+            kwargs.pop('record')
+        else:
+            self.record = False
+
         if 'structure' in kwargs.keys():
             structure = kwargs['structure']
             kwargs.pop('structure')
@@ -213,10 +222,10 @@ class ProbTree(Tree):
             mode = 'pulse'
 
         if 'root_point' in kwargs.keys():
-            self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]))
+            self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]), record=self.record)
             kwargs.pop('root_point')
         else:
-            self.root = Segment()
+            self.root = Segment(record=self.record)
 
         if structure == 'prob':
             self.build_prob(**kwargs)

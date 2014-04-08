@@ -7,9 +7,10 @@ from neuron import h
 
 class NMNeuron:
     #TODO: fully parametrize root point and growth direction
-    def __init__(self, root_point):
+    def __init__(self, root_point, record=True):
+        self.record = record
         self.axon = axons.ProbTree(root_point=root_point,
-                                   mode='mod_click', structure='logistic')
+                                   mode='mod_click', structure='logistic', record=self.record)
         self.spiketimes = []
         self.stims = []
 

@@ -4,13 +4,15 @@ import numpy as np
 
 
 class NMNeuronPopulation:
-    def __init__(self, size=100, side='ipsi'):
+    def __init__(self, size=100, side='ipsi', record=True):
         self.side = side
         self.size = size
         self.x_offset = 4500.
         self.x_spread = 200.
-        self.neurons = [neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand()) for n in
-                        range(size)]
+        self.record = record
+        self.neurons = [
+            neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand(), record=self.record) for n in
+            range(size)]
 
     def set_stimulation(self, stimtype='mod_click', freq=4000.):
         #TODO: make this take more than a single stimtype

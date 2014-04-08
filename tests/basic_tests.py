@@ -28,3 +28,17 @@ def test_experiment_setup():
     exp.add_population(contra_pop)
     exp.add_electrode(electrode)
     exp.run(t=1.)
+
+
+def test_stepwise_run():
+    import pyLaminaris.populations as pops
+    import pyLaminaris.experiment
+    import pyLaminaris.recording
+    import numpy as np
+
+    exp = pyLaminaris.experiment.Experiment()
+    ipsi_pop = pops.NMNeuronPopulation(size=1, record=False)
+    electrode = pyLaminaris.recording.Electrode(location=np.array([0., 0., 0.]))
+    exp.add_population(ipsi_pop)
+    exp.add_electrode(electrode)
+    exp.run(t=1., mode='step')
