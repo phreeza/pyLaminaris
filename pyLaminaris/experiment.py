@@ -72,6 +72,7 @@ class Experiment:
                 counter += 1.
                 if np.mod(counter, interval) == 0:
                     iloc = []
+                    imem.append(np.array([[]]))
                     rtfactor = (h.t - ti) * 1E-3 / (time() - t0)
                     print 't = %.0f, realtime factor: %.3f' % (h.t, rtfactor)
                     t0 = time()
@@ -79,18 +80,13 @@ class Experiment:
 
                     for p in self.populations:
                         imem_n, iloc_n = p.nodes_imem_loc()
-                        imem.append(imem_n)
+                        imem[-1] = np.append(imem[-1], imem_n)
                         iloc.append(iloc_n)
 
                     for n in self.neurons:
                         imem_n, iloc_n = n.nodes_imem_loc()
-                        imem.append(imem_n)
+                        imem[-1] = np.append(imem[-1], imem_n)
                         iloc.append(iloc_n)
-
-                        #TODO: stepwise calculation
-                    # extract current
-                    # calculate fields
-                    # append
 
             imem, iloc = np.vstack(imem), np.vstack(iloc)
             for e in self.electrodes:

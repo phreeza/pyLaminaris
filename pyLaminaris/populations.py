@@ -34,7 +34,8 @@ class NMNeuronPopulation:
             imem_n, iloc_n = n.nodes_imem_loc()
             imem.append(imem_n)
             iloc.append(iloc_n)
-        imem, iloc = np.vstack(imem), np.vstack(iloc)
+        imem = np.vstack(imem)
+        iloc = np.vstack(iloc)
         if self.side == 'contra':
             iloc[:, 0] = 2 * (self.x_offset + self.x_spread) - iloc[:, 0]
         return imem, iloc

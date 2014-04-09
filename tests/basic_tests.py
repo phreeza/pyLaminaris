@@ -37,8 +37,12 @@ def test_stepwise_run():
     import numpy as np
 
     exp = pyLaminaris.experiment.Experiment()
-    ipsi_pop = pops.NMNeuronPopulation(size=1, record=False)
+    ipsi_pop = pops.NMNeuronPopulation(side='ipsi', size=2, record=False)
+    contra_pop = pops.NMNeuronPopulation(side='contra', size=2, record=False)
     electrode = pyLaminaris.recording.Electrode(location=np.array([0., 0., 0.]))
+    ipsi_pop.set_stimulation(stimtype='click', freq=4000.)
+    contra_pop.set_stimulation(stimtype='click', freq=4000.)
     exp.add_population(ipsi_pop)
+    exp.add_population(contra_pop)
     exp.add_electrode(electrode)
     exp.run(t=1., mode='step')

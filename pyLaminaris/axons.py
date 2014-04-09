@@ -66,7 +66,7 @@ class Segment:
                                for n in range(self.nnode)]
 
     def get_instantaneous_imem(self):
-        return [self.nodes[i](0.5).i_membrane for i in range(self.nnode)]
+        return np.array([[self.nodes[i](0.5).i_membrane for i in range(self.nnode)]]).T
 
     def add_branch(self, direction=np.array([3 * 77., 0., 0.]),
                    angles=np.array([0., 0., 30.])):
