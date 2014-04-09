@@ -29,7 +29,7 @@ class Segment:
     def __init__(self, parent=None, node_pitch=77.,
                  start=np.array([0., 0., 0.]), end=np.array([3 * 77., 0., 0.]), record=True):
 
-        nnode = int(np.ceil(np.linalg.norm(end - start) / node_pitch))
+        self.nnode = int(np.ceil(np.linalg.norm(end - start) / node_pitch))
 
         self.record = record
 
@@ -43,13 +43,13 @@ class Segment:
         self.start = start
         self.end = end
 
-        self.nodes = [h.Section() for x in range(nnode)]
-        self.myelin = [h.Section() for x in range(nnode)]
+        self.nodes = [h.Section() for x in range(self.nnode)]
+        self.myelin = [h.Section() for x in range(self.nnode)]
         # To connect two sections, call the connect() method of the child
         # Section object with the parent section as the argument:
-        for n in range(nnode):
+        for n in range(self.nnode):
             self.nodes[n].connect(self.myelin[n])
-        for n in range(nnode - 1):
+        for n in range(self.nnode - 1):
             self.myelin[n + 1].connect(self.nodes[n])
 
         if self.parent is not None:
@@ -58,13 +58,15 @@ class Segment:
         self._sections_setup()
 
         if self.record:
-            self.rec_i_mem = [h.Vector() for i in range(nnode)]
+            self.rec_i_mem = [h.Vector() for i in range(self.nnode)]
             [self.rec_i_mem[i].record(self.nodes[i](0.5)._ref_i_membrane)
-             for i in range(nnode)]
+             for i in range(self.nnode)]
 
-        self.node_locations = [self.start + (n + 1.) / nnode * (self.end - self.start)
-                               for n in range(nnode)]
+        self.node_locations = [self.start + (n + 1.) / self.nnode * (self.end - self.start)
+                               for n in range(self.nnode)]
 
+    def get_instantaneous_imem(self):
+        return [self.nodes[i](0.5).i_membrane for i in range(self.nnode)]
 
     def add_branch(self, direction=np.array([3 * 77., 0., 0.]),
                    angles=np.array([0., 0., 30.])):
@@ -185,7 +187,7 @@ class Tree:
             if s.record:
                 imem.extend(s.rec_i_mem)
             else:
-                raise NotImplementedError
+                imem.extend(s.get_instantaneous_imem())
             loc.extend(s.node_locations)
         imem = [np.array(i) for i in imem]
 

@@ -64,16 +64,34 @@ class Experiment:
                 assert not p.record
             #TODO: stepwise initialisation
             # do not record currents over time
+            imem = []
+            iloc = []
+
             while h.t < t:
                 h.fadvance()
                 counter += 1.
                 if np.mod(counter, interval) == 0:
+                    iloc = []
                     rtfactor = (h.t - ti) * 1E-3 / (time() - t0)
                     print 't = %.0f, realtime factor: %.3f' % (h.t, rtfactor)
                     t0 = time()
                     ti = h.t
 
-                    #TODO: stepwise calculation
+                    for p in self.populations:
+                        imem_n, iloc_n = p.nodes_imem_loc()
+                        imem.append(imem_n)
+                        iloc.append(iloc_n)
+
+                    for n in self.neurons:
+                        imem_n, iloc_n = n.nodes_imem_loc()
+                        imem.append(imem_n)
+                        iloc.append(iloc_n)
+
+                        #TODO: stepwise calculation
                     # extract current
                     # calculate fields
                     # append
+
+            imem, iloc = np.vstack(imem), np.vstack(iloc)
+            for e in self.electrodes:
+                e.calc_fields(iloc, imem.T)
