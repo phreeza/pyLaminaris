@@ -73,8 +73,8 @@ class Experiment:
                 if np.mod(counter, interval) == 0:
                     iloc = []
                     imem.append(np.array([[]]))
-                    rtfactor = (h.t - ti) * 1E-3 / (time() - t0)
-                    print 't = %.0f, realtime factor: %.3f' % (h.t, rtfactor)
+                    #rtfactor = (h.t - ti) * 1E-3 / (time() - t0)
+                    #print 't = %.0f, realtime factor: %.3f' % (h.t, rtfactor)
                     t0 = time()
                     ti = h.t
 
