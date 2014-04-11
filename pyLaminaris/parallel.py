@@ -15,8 +15,8 @@ class ParallelExperiment:
         self.rank = int(self.pc.id())
 
         s = "mpi4py thinks I am %d of %d, NEURON thinks I am %d of %d\n"
-        cw = MPI.COMM_WORLD
-        print s % (cw.rank, cw.size,
+        self.cw = MPI.COMM_WORLD
+        print s % (self.cw.rank, self.cw.size,
                    self.pc.id(), self.pc.nhost())
 
         print "Minion %i of %i reporting for duty" % (self.rank, self.nhost)
@@ -39,4 +39,6 @@ class ParallelExperiment:
 
     def run(self, t=20., mode='step'):
         self.exp.run(t=t, mode=mode)
-        return self.electrode.recorded_potential.shape
+        pot = self.cw.gather(self.electrode.recorded_potential, root=0)
+        if self.rank == 0:
+            return pot

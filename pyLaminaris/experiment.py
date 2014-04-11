@@ -55,7 +55,7 @@ class Experiment:
             from time import time
 
             counter = 0
-            interval = 10
+            interval = 1
 
             t0 = time()
             ti = h.t
