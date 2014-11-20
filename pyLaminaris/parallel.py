@@ -9,17 +9,21 @@ from neuron import h
 
 
 class ParallelExperiment:
-    def __init__(self, n=2):
-        self.pc = h.ParallelContext()
-        self.nhost = int(self.pc.nhost())
-        self.rank = int(self.pc.id())
+    """Parallel Experiments can be run with mpirun -np 4 python ..."""
 
-        s = "mpi4py thinks I am %d of %d, NEURON thinks I am %d of %d\n"
+    def __init__(self, n=2):
         self.cw = MPI.COMM_WORLD
-        print s % (self.cw.rank, self.cw.size,
-                   self.pc.id(), self.pc.nhost())
+        self.nhost = int(self.cw.nhost())
+        self.rank = int(self.cw.id())
+
+        s = "mpi4py thinks I am %d of %d\n"
+
+        print s % (self.cw.rank, self.cw.size)
 
         print "Minion %i of %i reporting for duty" % (self.rank, self.nhost)
+
+        if n is None:
+            n = self.nhost
 
         self.sizes = np.array([int(n / self.nhost) for i in range(n)])
         self.sizes[:(n % self.nhost)] += 1
@@ -42,3 +46,4 @@ class ParallelExperiment:
         pot = self.cw.gather(self.electrode.recorded_potential, root=0)
         if self.rank == 0:
             return pot
+        MPI.Finalize()

@@ -2,7 +2,7 @@ from pyLaminaris import parallel
 import numpy as np
 from neuron import h
 
-e = parallel.ParallelExperiment(n=20)
+e = parallel.ParallelExperiment(n=None)
 
 e.setup()
 ret = e.run(t=2.)
