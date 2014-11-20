@@ -13,14 +13,8 @@ class ParallelExperiment:
 
     def __init__(self, n=2):
         self.cw = MPI.COMM_WORLD
-        self.nhost = int(self.cw.nhost())
-        self.rank = int(self.cw.id())
-
-        s = "mpi4py thinks I am %d of %d\n"
-
-        print s % (self.cw.rank, self.cw.size)
-
-        print "Minion %i of %i reporting for duty" % (self.rank, self.nhost)
+        self.nhost = int(self.cw.size)
+        self.rank = int(self.cw.rank)
 
         if n is None:
             n = self.nhost
