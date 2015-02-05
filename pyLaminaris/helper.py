@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as _np
 
 
 def hom_poisson(rate, t_end=1., t_start=0., t_ref=0.0):
@@ -30,12 +30,12 @@ def hom_poisson(rate, t_end=1., t_start=0., t_ref=0.0):
     t = t_start
     train = []
     while t < t_end:
-        ISI = -np.log(np.random.random()) / rate  # ISIs in seconds
+        ISI = -_np.log(_np.random.random()) / rate  # ISIs in seconds
         t = t + ISI
         train.append(t)
         t = t + t_ref
 
-    return np.array(train)
+    return _np.array(train)
 
 
 def inhom_poisson(rate, t_end=1., t_start=0., rate_max=1000., t_ref=0.0):
@@ -72,7 +72,7 @@ def inhom_poisson(rate, t_end=1., t_start=0., rate_max=1000., t_ref=0.0):
             and np.random.random() < rate(t) / rate_max):
             train_thinned.append(t)
 
-    return np.array(train_thinned)
+    return _np.array(train_thinned)
 
 
 def adaptation(train, tau_P=15., f_d=0.5, g_max=1., g_0=None):
@@ -80,15 +80,15 @@ def adaptation(train, tau_P=15., f_d=0.5, g_max=1., g_0=None):
     Given a spike train, calculate the corresponding EPSP amplitudes
     with a simple depleting synapse model
     '''
-    g = np.zeros(train.shape)
+    g = _np.zeros(train.shape)
     if g_0 is None:
         g[0] = g_max
     else:
         g[0] = g_0
 
     for n in range(1, len(train)):
-        g[n] = (g[n - 1] * f_d * np.exp(-(train[n] - train[n - 1]) / tau_P)
-                + g_max * (1 - np.exp(-(train[n] - train[n - 1]) / tau_P)))
+        g[n] = (g[n - 1] * f_d * _np.exp(-(train[n] - train[n - 1]) / tau_P)
+                + g_max * (1 - _np.exp(-(train[n] - train[n - 1]) / tau_P)))
 
     return g
 
@@ -98,7 +98,7 @@ def adaptation_double(train, tau_F=0.015, tau_S=1.1, k=0.3, f_d=0.6, g_max=1., g
     Given a spike train, calculate the corresponding EPSP amplitudes
     with a double decay model as used in Cook, et al 2004.
     '''
-    g = np.zeros(train.shape)
+    g = _np.zeros(train.shape)
     if g_0 is None:
         g[0] = g_max
     else:
@@ -106,20 +106,20 @@ def adaptation_double(train, tau_F=0.015, tau_S=1.1, k=0.3, f_d=0.6, g_max=1., g
 
     for n in range(1, len(train)):
         g[n] = (k *
-                (g[n - 1] * f_d * np.exp(-(train[n] - train[n - 1]) / tau_F)
-                 + g_max * (1 - np.exp(-(train[n] - train[n - 1]) / tau_F)))
+                (g[n - 1] * f_d * _np.exp(-(train[n] - train[n - 1]) / tau_F)
+                 + g_max * (1 - _np.exp(-(train[n] - train[n - 1]) / tau_F)))
                 + (1 - k) *
-                (g[n - 1] * f_d * np.exp(-(train[n] - train[n - 1]) / tau_S)
-                 + g_max * (1 - np.exp(-(train[n] - train[n - 1]) / tau_S))))
+                (g[n - 1] * f_d * _np.exp(-(train[n] - train[n - 1]) / tau_S)
+                 + g_max * (1 - _np.exp(-(train[n] - train[n - 1]) / tau_S))))
 
     return g
 
 
 def convolve_train_amp(times, kernel, train, amp=None):
     if amp is None:
-        amp = np.ones(train.shape)
+        amp = _np.ones(train.shape)
 
-    ret = np.zeros(times.shape)
+    ret = _np.zeros(times.shape)
     for n in range(len(train)):
         ret = ret + amp[n] * kernel(times - train[n])
 
@@ -128,6 +128,6 @@ def convolve_train_amp(times, kernel, train, amp=None):
 
 def alpha_kern(tau):
     def ret(t):
-        return (t > 0) * t * np.exp(-t / tau)
+        return (t > 0) * t * _np.exp(-t / tau)
 
     return ret
