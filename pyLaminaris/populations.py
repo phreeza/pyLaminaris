@@ -1,5 +1,5 @@
 __author__ = 'mccolgan'
-import neurons
+import neurons as _neurons
 import numpy as np
 
 
@@ -11,7 +11,7 @@ class NMNeuronPopulation:
         self.x_spread = 200.
         self.record = record
         self.neurons = [
-            neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand(), record=self.record) for n in
+            _neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand(), record=self.record) for n in
             range(size)]
 
     def set_stimulation(self, stimtype='mod_click', freq=4000.):
@@ -24,8 +24,19 @@ class NMNeuronPopulation:
                     + 1.5 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 11) ** 2)
                     - 0.1 * np.exp(-16 * (t - 10.5) ** 2))
 
+        def pulse(t):
+            return (0.1
+                    + 2.9 * np.exp(-16 * (t - 10.) ** 2))
+
+        if stimtype == 'mod_click':
+            fun = mod_click
+        elif stimtype == 'pulse':
+            fun = pulse
+        else:
+            raise NameError, "Unknown stimulation type"
+
         for n in self.neurons:
-            n.set_spiketimes(helper.inhom_poisson(mod_click, 20., 0., 6.))
+            n.set_spiketimes(helper.inhom_poisson(fun, 20., 0., 6.))
 
     def nodes_imem_loc(self):
         imem = []
