@@ -69,7 +69,7 @@ def inhom_poisson(rate, t_end=1., t_start=0., rate_max=1000., t_ref=0.0):
     train_thinned = [train_start[0]]
     for n, t in enumerate(train):
         if (t - train_thinned[-1] >= t_ref
-            and np.random.random() < rate(t) / rate_max):
+            and _np.random.random() < rate(t) / rate_max):
             train_thinned.append(t)
 
     return _np.array(train_thinned)

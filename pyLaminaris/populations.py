@@ -9,13 +9,19 @@ class NMNeuronPopulation:
         self.size = size
         self.x_offset = 4500.
         self.x_spread = 200.
+        self.y_offset = 0.
+        self.y_spread = 400.
         self.record = record
         self.neurons = [
-            _neurons.NMNeuron(root_point=self.x_offset + self.x_spread * np.random.rand(), record=self.record) for n in
+            _neurons.NMNeuron(
+                root_point=[
+                    self.x_offset + self.x_spread * np.random.rand(),
+                    self.y_offset + self.y_spread * np.random.rand(),
+                    0.0
+                ], record=self.record) for n in
             range(size)]
 
     def set_stimulation(self, stimtype='mod_click', freq=4000.):
-        #TODO: make this take more than a single stimtype
         import helper
 
         def mod_click(t):
@@ -50,3 +56,7 @@ class NMNeuronPopulation:
         if self.side == 'contra':
             iloc[:, 0] = 2 * (self.x_offset + self.x_spread) - iloc[:, 0]
         return imem, iloc
+
+    def draw_2d(self, thin=10):
+        for n in self.neurons[::thin]:
+            n.axon.draw_2d(alpha=0.1)

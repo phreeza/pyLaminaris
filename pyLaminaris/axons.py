@@ -29,6 +29,9 @@ class Segment:
     def __init__(self, parent=None, node_pitch=77.,
                  start=np.array([0., 0., 0.]), end=np.array([3 * 77., 0., 0.]), record=True):
 
+        start = np.array(start)
+        end = np.array(end)
+
         self.nnode = int(np.ceil(np.linalg.norm(end - start) / node_pitch))
 
         self.record = record
@@ -70,7 +73,7 @@ class Segment:
 
     def add_branch(self, direction=np.array([3 * 77., 0., 0.]),
                    angles=np.array([0., 0., 30.])):
-        R1 = _rotation(angles / 360. * np.pi)  #half the angle in rad
+        R1 = _rotation(angles / 360. * np.pi)  # half the angle in rad
         R2 = _rotation(-angles / 360. * np.pi)
         if direction.shape[0] == 3:
             direction = np.vstack((direction, direction))
@@ -85,7 +88,7 @@ class Segment:
         diam_myelin = 1.3
         diam_node = 1.3
 
-        area_node = np.pi * L_node * diam_node * 1.e-8  #in cm^2
+        area_node = np.pi * L_node * diam_node * 1.e-8  # in cm^2
         for sec in self.myelin:
             sec.nseg = 10
             sec.L = L_myelin
@@ -96,7 +99,7 @@ class Segment:
 
             sec.erev_leak = -20.
             sec.g_leak = 1.0e-6
-            #sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
+            # sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
             sec.cm = 0.001  #1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
             sec.Ra = 50.  #Ra(sec.diam)
 
@@ -112,7 +115,7 @@ class Segment:
             sec.insert('extracellular')
 
             sec.gnabar_na = .8
-            #sec.alphahVHalf_na = -58.
+            # sec.alphahVHalf_na = -58.
             #sec.betahVHalf_na = -58.
             #sec.alphahK_na = 5.
             #sec.betahK_na = 5.
@@ -181,8 +184,15 @@ class Tree:
         segs = self.segments()
         imem = []
         loc = []
-        for s in segs:
-            #TODO: here is where we need to differentiate record or not.
+        #exclude first sections of root segment
+        if segs[0].record:
+            imem.extend(segs[0].rec_i_mem[10:])
+        else:
+            imem.extend(segs[0].get_instantaneous_imem()[10:])
+        loc.extend(segs[0].node_locations[10:])
+
+        for s in segs[1:]:
+            # TODO: here is where we need to differentiate record or not.
             #FIXME: Should be failing a test!!!!
             if s.record:
                 imem.extend(s.rec_i_mem)
@@ -193,16 +203,16 @@ class Tree:
 
         return np.array(imem), np.array(loc)
 
-    def draw_2d(self):
+    def draw_2d(self, alpha=1.0):
         from matplotlib import pyplot as plt
         import numpy as np
 
         for s in self.segments():
             l = np.vstack((s.start, s.end))
-            plt.plot(l[:, 0], l[:, 1], 'k')
+            plt.plot(l[:, 0], l[:, 1], 'k',alpha=alpha)
 
             n = np.vstack(s.node_locations)
-            plt.plot(n[:, 0], n[:, 1], 'k.')
+            plt.plot(n[:, 0], n[:, 1], 'k.', alpha=alpha)
 
         plt.gca().set_aspect('equal')
 
@@ -230,7 +240,10 @@ class ProbTree(Tree):
             mode = 'pulse'
 
         if 'root_point' in kwargs.keys():
-            self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]), record=self.record)
+            if type(kwargs['root_point']) is float or type(kwargs['root_point']) is int:
+                self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]), record=self.record)
+            else:
+                self.root = Segment(start=[0,kwargs['root_point'][1],kwargs['root_point'][2]],end=kwargs['root_point'], record=self.record)
             kwargs.pop('root_point')
         else:
             self.root = Segment(record=self.record)
@@ -241,43 +254,43 @@ class ProbTree(Tree):
             self.build_logistic(**kwargs)
 
         self.virgin = True
-        #self.delay = 1.5 + 0.25*np.random.randn()
-
-        if mode == 'pulse':
-            class rv(stats.rv_continuous):
-                def _pdf(self, x):
-                    return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
-
-            myrv = rv()
-            self.delay = [0.]
-            while self.delay[0] < 0.2:
-                self.delay[0] = myrv.rvs(1.5)
-        elif mode == 'spont':
-            import helper
-
-            self.delay = helper.hom_poisson(0.1, 100, .1)
-        elif mode == 'click':
-            import helper
-
-            def click(t):
-                return 0.1 + 0.9 * np.exp(np.sin(6 * np.pi * t) - 1. - (t - 35) ** 2)
-
-            self.delay = helper.inhom_poisson(click, 50., 0., 200.)
-        elif mode == 'mod_click':
-            import helper
-
-            def mod_click(t):
-                return (0.1
-                        + 2.9 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 10) ** 2)
-                        + 1.5 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 11) ** 2)
-                        - 0.1 * np.exp(-16 * (t - 10.5) ** 2))
-
-            self.delay = helper.inhom_poisson(mod_click, 20., 0., 6.)
+        # # self.delay = 1.5 + 0.25*np.random.randn()
+        # #FIXME: why is this here?
+        # if mode == 'pulse':
+        #     class rv(stats.rv_continuous):
+        #         def _pdf(self, x):
+        #             return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
+        #
+        #     myrv = rv()
+        #     self.delay = [0.]
+        #     while self.delay[0] < 0.2:
+        #         self.delay[0] = myrv.rvs(1.5)
+        # elif mode == 'spont':
+        #     import helper
+        #
+        #     self.delay = helper.hom_poisson(0.1, 100, .1)
+        # elif mode == 'click':
+        #     import helper
+        #
+        #     def click(t):
+        #         return 0.1 + 0.9 * np.exp(np.sin(6 * np.pi * t) - 1. - (t - 35) ** 2)
+        #
+        #     self.delay = helper.inhom_poisson(click, 50., 0., 200.)
+        # elif mode == 'mod_click':
+        #     import helper
+        #
+        #     def mod_click(t):
+        #         return (0.1
+        #                 + 2.9 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 10) ** 2)
+        #                 + 1.5 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 11) ** 2)
+        #                 - 0.1 * np.exp(-16 * (t - 10.5) ** 2))
+        #
+        #     self.delay = helper.inhom_poisson(mod_click, 20., 0., 6.)
 
     def build_logistic(self,
                        bif_center=5000., bif_sigma=200., bif_amp=500.,
                        ter_center=5500., ter_sigma=100.,
-                       ang_mean=20., ang_var=0.
+                       ang_mean=20., ang_var=5.
     ):
 
         def bif(x, A, mu, sigma):
@@ -303,7 +316,8 @@ class ProbTree(Tree):
 
     def build_prob(self, depth=5, p=[1., .9, .7, .5, .5, .4],
                    dir_mean=154., dir_var=77.,
-                   ang_mean=37.5, ang_var=12.5):
+                   ang_mean=25, ang_var=20):
+                   #ang_mean=37.5, ang_var=12.5):
         def build_recursive(node, depth, p, dir_mean, dir_var, ang_mean, ang_var):
             if (node.order < depth) and (np.random.rand() < p[node.order]):
                 node.add_branch(
