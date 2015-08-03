@@ -19,7 +19,7 @@ class Electrode:
             self.build_dist_coeffs(node_locs)
 
         ret = np.dot(node_imem.T, self.dist_coeffs) / conductivity
-        self.recorded_potential = ret
+        self.recorded_potential = ret[:,0]
 
     def build_dist_coeffs(self, node_locs):
         self.dist_coeffs = np.zeros(node_locs.shape)

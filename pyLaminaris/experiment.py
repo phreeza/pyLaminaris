@@ -34,7 +34,9 @@ class Experiment:
         if mode == 'batch':
             for p in self.populations:
                 assert p.record
+            print "run started"
             neuron.run(t)
+            print "run ended"
             imem = []
             iloc = []
             for p in self.populations:

@@ -10,7 +10,7 @@ class NMNeuronPopulation:
         self.x_offset = 4500.
         self.x_spread = 200.
         self.y_offset = 0.
-        self.y_spread = 400.
+        self.y_spread = 20.
         self.record = record
         self.neurons = [
             _neurons.NMNeuron(

@@ -178,7 +178,7 @@ class Tree:
     def leaves(self):
         return [s for s in self.segments() if len(s.children) == 0]
 
-    def nodes_imem_loc(self):
+    def nodes_imem_loc(self,with_root=True):
         import numpy as np
 
         segs = self.segments()
@@ -190,9 +190,12 @@ class Tree:
         else:
             imem.extend(segs[0].get_instantaneous_imem()[10:])
         loc.extend(segs[0].node_locations[10:])
-
-        for s in segs[1:]:
-            # TODO: here is where we need to differentiate record or not.
+        if with_root:
+          start = 0
+        else:
+          start = 1
+        for s in segs[start:]:
+            #TODO: here is where we need to differentiate record or not.
             #FIXME: Should be failing a test!!!!
             if s.record:
                 imem.extend(s.rec_i_mem)
@@ -203,16 +206,16 @@ class Tree:
 
         return np.array(imem), np.array(loc)
 
-    def draw_2d(self, alpha=1.0):
+    def draw_2d(self, alpha=1.0,color='b'):
         from matplotlib import pyplot as plt
         import numpy as np
 
         for s in self.segments():
             l = np.vstack((s.start, s.end))
-            plt.plot(l[:, 0], l[:, 1], 'k',alpha=alpha)
+            plt.plot(l[:, 0], l[:, 1], 'k',alpha=alpha,color=color)
 
             n = np.vstack(s.node_locations)
-            plt.plot(n[:, 0], n[:, 1], 'k.', alpha=alpha)
+            plt.plot(n[:, 0], n[:, 1], 'k.', alpha=alpha,color=color)
 
         plt.gca().set_aspect('equal')
 

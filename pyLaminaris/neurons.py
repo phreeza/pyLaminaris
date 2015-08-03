@@ -19,7 +19,7 @@ class NMNeuron:
         for d in self.spiketimes:
             stim = h.IClamp(self.axon.root.nodes[0](0.5))
             stim.delay = d
-            stim.amp = 1.
+            stim.amp = 0.5
             stim.dur = 0.1
             self.stims.append(stim)
 

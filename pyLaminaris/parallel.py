@@ -45,7 +45,7 @@ class ParallelExperiment:
 class ParallelBundleExperiment:
     """Parallel Experiments can be run with mpirun -np 4 python ..."""
 
-    def __init__(self, n=200):
+    def __init__(self, n=120):
         self.cw = MPI.COMM_WORLD
         self.nhost = int(self.cw.size)
         self.rank = int(self.cw.rank)
@@ -57,15 +57,16 @@ class ParallelBundleExperiment:
         self.sizes[:(n % self.nhost)] += 1
 
         self.mysize = self.sizes[self.rank]
+        print self.mysize
 
     def setup(self):
         self.exp = experiment.Experiment()
         self.pop = pops.NMNeuronPopulation(size=self.mysize, record=True)
         self.electrodes = []
 
-        for n in range(30):
-            for m in range(10):
-                self.electrodes.append(recording.Electrode(location=np.array([3000.+100.*n, 200.*m, 0.])))
+        for n in range(70):
+            for m in range(20):
+                self.electrodes.append(recording.Electrode(location=np.array([10000.+100.*n,50.*m*m, 0.])))
         self.pop.set_stimulation(stimtype='pulse')
         self.exp.add_population(self.pop)
         for e in self.electrodes:
@@ -73,9 +74,12 @@ class ParallelBundleExperiment:
 
     def run(self, t=20., mode='batch'):
         self.exp.run(t=t, mode=mode)
-        pot = self.cw.gather([e.recorded_potential for e in self.electrodes], root=0)
+        print "gathering",self.rank
+        nodes = self.cw.gather(self.pop.segment_locations(),root=0)
+        pot = [self.cw.gather(e.recorded_potential,root=0) for e in self.electrodes]
+        print "gathering complete",self.rank
         if self.rank == 0:
             loc = [e.location for e in self.electrodes]
-            pot = np.sum(pot,axis=0)[:,:,0]
-            np.savez('potential.npz', pot=pot,loc=loc)
+            pot = np.sum(pot,axis=1)
+            np.savez('data/parallel_bundle_potential.npz', pot=pot,loc=loc,nodes=nodes)
         MPI.Finalize()
