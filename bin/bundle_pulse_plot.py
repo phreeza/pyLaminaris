@@ -4,20 +4,28 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes
 
 import matplotlib as mpl
+from scipy import signal
 
 
 def run_fig1(pot):
-    gs = [gridspec.GridSpec(10, 14, bottom=0.5),
-          gridspec.GridSpec(10, 14, top=0.52, bottom=0.18)]
+    gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
+          gridspec.GridSpec(10, 14, top=0.48, bottom=0.1)]
+
+    dt = 0.0025
+    filt_freq = 2000.
+
+    filter_type = ['lowpass', 'highpass']
+
+    scalemax = 1.0
+    norm = mpl.colors.Normalize(vmin=0, vmax=scalemax)
 
     ax1 = [None, None]
     ax2 = [None, None]
     ax3 = [None, None]
     for freq_n in range(2):
+        b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
+        fted = signal.lfilter(b, a, pot['pot'], axis=1)
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
-
-        scalemax = 1.0
-        norm = mpl.colors.Normalize(vmin=0, vmax=scalemax)
 
         node_locs = []
         for ngroup in pot['nodes']:
@@ -30,34 +38,46 @@ def run_fig1(pot):
         # plt.subplot(gs[n%10,int(n/10)+3])
         # plt.axis('off')
         # m = 900+(n%10)*40+2*int(n/10)+1
-        #    plt.plot(psds[m,:])
-        #    #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
+        # plt.plot(psds[m,:])
+        # #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
         #    plt.semilogy()
         #
         #for fmt in ['.png', '.pdf']:
         #    plt.savefig('figs/bundle_pulse_psds' + fmt)
 
         #plt.close()
-        times = np.arange(0., 20., 0.0025)
+        times = np.arange(0., 20., dt)
         locs = []
         for n in range(10):
             for m in range(3):
-                ax_t = plt.subplot(gs[freq_n][n, m + 5])
+                ax_t = plt.subplot(gs[freq_n][n, 2 * m + 5:2 * m + 7])
                 ax_t.axis('off')
                 index = 760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
 
-                lh = ax_t.plot(times[3500:-2499], pot['pot'][index, 3500:-2500] - pot['pot'][index, :].mean())[0]
+                lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
                 lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
                 dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
                 #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
 
-        amps = pot['pot'][:, .3500:-2500].max(axis=1) - pot['pot'][:, .3500:-2500].min(axis=1)
+        amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
+
+        ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1,1))))
+        index = [760 + 20 * n + 1 + 1 for n in range(30)]
+        if freq_n == 0:
+            amp_line = np.array([fted[n, ft_abs[n, :].argmax()] for n in index])
+            amp_line = -amp_line + amp_line.mean()
+            amp_line = 3*amp_line/amp_line.max()
+        else:
+            amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
+            amp_line = 15*amp_line/amp_line.max()
+
+        locs_line = pot['loc'][index, 0]
 
         ax1[freq_n].contour(pot['loc'][:, 1].reshape((70, -1)), pot['loc'][:, 0].reshape((70, -1)),
-                            amps.reshape((70, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(10), cmap=plt.cm.jet,
+                            amps.reshape((70, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -74,52 +94,67 @@ def run_fig1(pot):
         ax1[freq_n].set_xlim(-100, 1300)
         ax1[freq_n].set_ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
 
-        ax2[freq_n] = plt.subplot(gs[freq_n][:, 8:11], sharey=ax1[freq_n])
+        #ax2[freq_n] = plt.subplot(gs[freq_n][:, 8:11], sharey=ax1[freq_n])
         bins = np.arange(0, 19000, 100.)
         hist, edges = np.histogram(node_locs[:, 0], bins=bins)
-        plt.bar(bottom=bins[:-1], width=hist / 100., height=bins[1], left=0, orientation='horizontal', color='k',
-                edgecolor='w')
-        ax2[freq_n].tick_params(left="off")
-        plt.xticks(np.arange(0, 18, 4))
-        plt.xlabel(u'nodes\n[1/\u03BCm]')
-        plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
+        #plt.bar(bottom=bins[:-1], width=hist / 100., height=bins[1], left=0, orientation='horizontal', color='k',
+        #        edgecolor='w')
+        #ax2[freq_n].tick_params(left="off")
+        #plt.xticks(np.arange(0, 18, 4))
+        #plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
+        #if freq_n == 1:
+        #    plt.xlabel(u'nodes\n[1/\u03BCm]')
+        #else:
+        #    plt.setp(ax2[freq_n].get_xticklabels(), visible=False)
 
         ax3[freq_n] = plt.subplot(gs[freq_n][:, 11:], sharey=ax1[freq_n])
         plt.subplots_adjust(left=0.05, right=0.95)
-        plt.bar(bottom=bins[1:-1], width=np.diff(hist) / 100., height=bins[1], left=0, orientation='horizontal',
-                color='k', edgecolor='w')
-        plt.xlabel(u'bif.-term.\n[1/\u03BCm]')
-        plt.xticks(np.arange(-4, 4, 2))
+        if freq_n == 0:
+            plt.bar(bottom=bins[1:-1], width=np.diff(hist) / 100., height=bins[1], left=0, orientation='horizontal',
+                    color='k', edgecolor='w')
+            plt.xlabel(u'bif.-term.\n[1/\u03BCm]')
+            plt.xticks(np.arange(-4, 4.1, 2))
+        else:
+            plt.bar(bottom=bins[:-1], width=hist / 100., height=bins[1], left=0, orientation='horizontal', color='k',
+                    edgecolor='w')
+            plt.xlabel(u'nodes\n[1/\u03BCm]')
+            ax3[freq_n].tick_params(left="off")
+            plt.xticks(np.arange(0, 18, 4))
+            plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
+
+        plt.plot(amp_line, locs_line,lw=2,color='r')
+
         plt.setp(ax1[freq_n].get_yticklabels(), visible=False)
-        plt.setp(ax2[freq_n].get_yticklabels(), visible=False)
+        #plt.setp(ax2[freq_n].get_yticklabels(), visible=False)
         plt.setp(ax3[freq_n].get_yticklabels(), visible=False)
         plt.setp(ax1[freq_n].get_xticklabels(), visible=False)
         #plt.setp( ax2[freq_n].get_xticklabels(), visible=False)
         #plt.setp( ax3[freq_n].get_xticklabels(), visible=False)
         plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
 
-        cb_ax = plt.gcf().add_axes([0.32, .2, .02, .6])
+    # [left, bottom, width, height]
+    cb_ax = plt.gcf().add_axes([0.15, .05, .4, .02])
 
-        def form1(x, pos):
-            """ This function returns a string with 1 decimal places, given the input x"""
-            return '%.1f' % x
+    def form1(x, pos):
+        """ This function returns a string with 1 decimal places, given the input x"""
+        return '%.1f' % x
 
-        from matplotlib.ticker import FuncFormatter
+    from matplotlib.ticker import FuncFormatter
 
-        cb1 = mpl.colorbar.ColorbarBase(cb_ax, cmap=plt.cm.jet,
-                                        norm=norm,
-                                        orientation='vertical', ticks=[0.0, scalemax])
-        cb1.set_label('Amplitude [mV]', labelpad=-15)
+    cb1 = mpl.colorbar.ColorbarBase(cb_ax, cmap=plt.cm.jet,
+                                    norm=norm,
+                                    orientation='horizontal', ticks=[0.0, scalemax])
+    cb1.set_label('Amplitude [mV]', labelpad=-5)
 
-        formatter = FuncFormatter(form1)
-        cb_ax.yaxis.set_major_formatter(FuncFormatter(formatter))
+    formatter = FuncFormatter(form1)
+    cb_ax.yaxis.set_major_formatter(FuncFormatter(formatter))
 
     plt.gcf().set_size_inches((8, 8))
 
     plt.figtext(0.1, 0.92, 'A', fontsize=24)
     plt.figtext(0.38, 0.92, 'B', fontsize=24)
-    plt.figtext(0.57, 0.92, 'C', fontsize=24)
-    plt.figtext(0.77, 0.92, 'D', fontsize=24)
+    # plt.figtext(0.57, 0.92, 'C', fontsize=24)
+    plt.figtext(0.77, 0.92, 'C', fontsize=24)
 
     # sb1_ax = plt.gcf().add_axes([0.05, .0, 0.9 / 14 * 5, .1], sharex=ax1[0])
     # sb1_ax.axis('off')
@@ -154,8 +189,8 @@ def run_fig2(pot):
     # cb_ax= plt.gcf().add_axes([0.44,.94,.46,.03])
     # norm = mpl.colors.LogNorm(vmin=psd_freqs[1], vmax=psd_freqs[100])
     # cb1 = mpl.colorbar.ColorbarBase(cb_ax, cmap=plt.cm.autumn,
-    #                                     norm=norm,
-    #                                     orientation='horizontal')
+    # norm=norm,
+    # orientation='horizontal')
     #cb_ax.xlim(psd_freqs[1],psd_freqs[100])
     #cb_ax.semilogx()
     #cb1.set_label('frequency [kHz]')
