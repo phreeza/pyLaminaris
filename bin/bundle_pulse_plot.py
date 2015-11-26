@@ -6,6 +6,8 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes
 import matplotlib as mpl
 from scipy import signal
 
+def get_index(row,col,n_rows=200,n_cols=30):
+    index = n_cols * row + col
 
 def run_fig1(pot):
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
@@ -52,7 +54,7 @@ def run_fig1(pot):
             for m in range(3):
                 ax_t = plt.subplot(gs[freq_n][n, 2 * m + 5:2 * m + 7])
                 ax_t.axis('off')
-                index = 760 + 60 * n + 2 * m + 1
+                index = get_index(36+3*n,2*m) #760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
 
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
@@ -65,7 +67,7 @@ def run_fig1(pot):
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1,1))))
-        index = [760 + 20 * n + 1 + 1 for n in range(30)]
+        index = [get_index(36+n,2) for n in range(30)]
         if freq_n == 0:
             amp_line = np.array([fted[n, ft_abs[n, :].argmax()] for n in index])
             amp_line = -amp_line + amp_line.mean()
@@ -191,17 +193,17 @@ def run_fig2(pot):
     # cb1 = mpl.colorbar.ColorbarBase(cb_ax, cmap=plt.cm.autumn,
     # norm=norm,
     # orientation='horizontal')
-    #cb_ax.xlim(psd_freqs[1],psd_freqs[100])
-    #cb_ax.semilogx()
-    #cb1.set_label('frequency [kHz]')
-    #plt.setp( cb_ax.get_xticklabels(), visible=False)
+    # cb_ax.xlim(psd_freqs[1],psd_freqs[100])
+    # cb_ax.semilogx()
+    # cb1.set_label('frequency [kHz]')
+    # plt.setp( cb_ax.get_xticklabels(), visible=False)
     plt.subplot(axarr[0, :9])
     plt.plot([1e1, 1e5], 3 * np.array([5e0, 5e-4]), color='k', linestyle='dashed')
     plt.plot([1e1, 1e5], 11 * np.array([5e0, 5e-8]), color='k', linestyle='dotted')
 
-    #for n in np.arange(-20,20,0.5):
-    #  plt.plot([1e0,1e5],10**n*np.array([1e0,1e-5]),color='k',alpha=0.1)
-    #  plt.plot([1e0,1e5],10**n*np.array([1e0,1e-10]),color='k',alpha=0.1)
+    # for n in np.arange(-20,20,0.5):
+    #     plt.plot([1e0,1e5],10**n*np.array([1e0,1e-5]),color='k',alpha=0.1)
+    #     plt.plot([1e0,1e5],10**n*np.array([1e0,1e-10]),color='k',alpha=0.1)
 
     n = 5
 
@@ -231,13 +233,13 @@ def run_fig2(pot):
 
     slopes = np.array([[np.polyfit(np.log(pot['loc'][n * 20 + 1:n * 20 + 20, 1]),
                                    np.log(psds[n * 20 + 1:n * 20 + 20, m:m + 20].mean(axis=1)), 1)[0] for m in
-                        range(100)] for n in range(30, 60)])
+                        range(psds.shape[-1]-20)] for n in range(30, 60)])
     plt.subplot(axarr[:, 12:])
-    plt.plot(psd_freqs[1:101], slopes.mean(axis=0))
-    plt.fill_between(psd_freqs[1:101], slopes.mean(axis=0) + slopes.std(axis=0),
+    plt.plot(psd_freqs[1:slopes.shape[1]+1], slopes.mean(axis=0))
+    plt.fill_between(psd_freqs[1:slopes.shape[1]+1], slopes.mean(axis=0) + slopes.std(axis=0),
                      slopes.mean(axis=0) - slopes.std(axis=0), alpha=0.2)
     plt.semilogx()
-    plt.xlim(psd_freqs[1], psd_freqs[100])
+    plt.xlim(psd_freqs[1], psd_freqs[slopes.shape[1]])
 
     ind.append(-1)
     for m in range(len(ind) - 1):
@@ -259,8 +261,35 @@ def run_fig2(pot):
 
     plt.close()
 
+def run_fig2new(pot):
+    dt = 0.0025
+    filt_freq = 2000.
+
+    filter_type = ['lowpass', 'highpass']
+
+    scalemax = 1.0
+
+    locs = []
+    amps = []
+    for freq_n in range(2):
+        locs.append([])
+        amps.append([])
+        b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
+        fted = signal.lfilter(b, a, pot['pot'], axis=1)
+        ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
+
+        for m in range(30):
+            amps[-1].append([])
+            for n in range(200):
+                index = get_index(n,m) #20 * n + m
+                if n == 0:
+                    locs[-1].append(pot['loc'][index,:])
+                # amps[-1][-1].append(ft_abs[index, :].max())
+                amps[-1][-1].append(fted[index,:].std())
+    return np.array(amps),np.array(locs)
 
 if __name__ == '__main__':
     potentials = np.load('data/parallel_bundle_potential.npz')
     run_fig1(potentials)
-    run_fig2(potentials)
+    #run_fig2(potentials)
+    amps,locs = run_fig2new(potentials)

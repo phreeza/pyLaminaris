@@ -65,8 +65,8 @@ class ParallelBundleExperiment:
         self.pop = pops.NMNeuronPopulation(size=self.mysize, record=True)
         self.electrodes = []
 
-        for n in range(70):
-            for m in range(20):
+        for n in range(200):
+            for m in range(30):
                 self.electrodes.append(recording.Electrode(location=np.array([10000.+100.*n,50.*m*m, 0.])))
         self.pop.set_stimulation(stimtype=self.stimtype)
         self.exp.add_population(self.pop)
