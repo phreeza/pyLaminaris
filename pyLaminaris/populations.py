@@ -7,9 +7,9 @@ class NMNeuronPopulation:
     def __init__(self, size=100, side='ipsi', record=True):
         self.side = side
         self.size = size
-        self.x_offset = 4500.
+        self.x_offset = 14500.
         self.x_spread = 200.
-        self.y_offset = 0.
+        self.y_offset = -10.
         self.y_spread = 20.
         self.record = record
         self.neurons = [
@@ -56,6 +56,15 @@ class NMNeuronPopulation:
         if self.side == 'contra':
             iloc[:, 0] = 2 * (self.x_offset + self.x_spread) - iloc[:, 0]
         return imem, iloc
+
+    def segment_locations(self):
+        ret = []
+        for ax in self.neurons:
+            ret.append([])
+            for seg in ax.axon.segments():
+                ret[-1].append(seg.node_locations)
+
+        return ret
 
     def draw_2d(self, thin=10):
         for n in self.neurons[::thin]:
