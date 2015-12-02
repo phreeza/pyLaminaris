@@ -8,3 +8,6 @@ apidoc/_*
 .doit.db
 data/
 figs/
+*.swp
+*.npz
+ipython_log.py
