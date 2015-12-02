@@ -6,8 +6,12 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes
 import matplotlib as mpl
 from scipy import signal
 
-def get_index(row,col,n_rows=200,n_cols=30):
-    index = n_cols * row + col
+n_rows = 200
+n_cols = 30
+
+
+def get_index(row, col, n_rows=n_rows, n_cols=n_cols):
+    return n_cols * row + col
 
 def run_fig1(pot):
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
@@ -56,7 +60,6 @@ def run_fig1(pot):
                 ax_t.axis('off')
                 index = get_index(36+3*n,2*m) #760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
-
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
@@ -78,8 +81,8 @@ def run_fig1(pot):
 
         locs_line = pot['loc'][index, 0]
 
-        ax1[freq_n].contour(pot['loc'][:, 1].reshape((70, -1)), pot['loc'][:, 0].reshape((70, -1)),
-                            amps.reshape((70, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
+        ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_cols, -1)), pot['loc'][:, 0].reshape((n_cols, -1)),
+                            amps.reshape((n_cols, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -284,8 +287,8 @@ def run_fig2new(pot):
                 index = get_index(n,m) #20 * n + m
                 if n == 0:
                     locs[-1].append(pot['loc'][index,:])
-                # amps[-1][-1].append(ft_abs[index, :].max())
-                amps[-1][-1].append(fted[index,:].std())
+                amps[-1][-1].append(ft_abs[index, 3500:-2499].max())
+                # amps[-1][-1].append(fted[index,3500:-2499].std())
     return np.array(amps),np.array(locs)
 
 if __name__ == '__main__':

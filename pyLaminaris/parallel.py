@@ -46,29 +46,48 @@ class ParallelExperiment:
 class ParallelBundleExperiment:
     """Parallel Experiments can be run with mpirun -np 4 python ..."""
 
-    def __init__(self, n=120, stimtype='pulse'):
+    def __init__(self, population_size=120, stimtype='pulse', **params):
         self.cw = MPI.COMM_WORLD
         self.nhost = int(self.cw.size)
         self.rank = int(self.cw.rank)
         self.stimtype = stimtype
+        self.params = params
+        self.electrode_params = dict(x_N=30, x_d=20, x_base=0, x_quadscale=True, y_N=300, y_d=20, y_base=10000,
+                                     y_quadscale=False)
+        if "electrode_params" in params.keys():
+            self.electrode_params.update(params["electrode_params"])
 
-        if n is None:
-            n = self.nhost
+        if population_size is None:
+            population_size = self.nhost
 
-        self.sizes = np.array([int(n / self.nhost) for i in range(n)])
-        self.sizes[:(n % self.nhost)] += 1
+        self.sizes = np.array([int(population_size / self.nhost) for i in range(population_size)])
+        self.sizes[:(population_size % self.nhost)] += 1
 
         self.mysize = self.sizes[self.rank]
-        print self.mysize
 
     def setup(self):
         self.exp = experiment.Experiment()
-        self.pop = pops.NMNeuronPopulation(size=self.mysize, record=True)
+        if 'population_params' in self.params.keys():
+            pop_params = self.params['population_params']
+        else:
+            pop_params = {}
+        self.pop = pops.NMNeuronPopulation(size=self.mysize, record=True, **pop_params)
         self.electrodes = []
 
-        for n in range(200):
-            for m in range(30):
-                self.electrodes.append(recording.Electrode(location=np.array([10000. + 100. * n, 50. * m * m, 0.])))
+        for n in range(self.electrode_params['y_N']):
+            if self.electrode_params['y_quadscale']:
+                nn = n * n
+            else:
+                nn = n
+            for m in range(self.electrode_params['x_N']):
+                if self.electrode_params['x_quadscale']:
+                    mm = m * m
+                else:
+                    mm = m
+                self.electrodes.append(recording.Electrode(location=np.array([
+                    self.electrode_params['y_base'] + self.electrode_params['y_d'] * nn,
+                    self.electrode_params['x_base'] + self.electrode_params['x_d'] * mm,
+                    0.])))
         self.pop.set_stimulation(stimtype=self.stimtype)
         self.exp.add_population(self.pop)
         for e in self.electrodes:

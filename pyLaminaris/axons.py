@@ -102,7 +102,7 @@ class Segment:
             # sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
             sec.cm = 0.001  #1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
             sec.Ra = 50.  #Ra(sec.diam)
-
+        n = 0
         for sec in self.nodes:
             sec.nseg = 1
             sec.L = L_node
@@ -113,8 +113,11 @@ class Segment:
             sec.insert('klva')
             sec.insert('khva')
             sec.insert('extracellular')
-
-            sec.gnabar_na = .8
+            if n == 0:
+                sec.gnabar_na = 2.4
+            else:
+                sec.gnabar_na = .8
+            # sec.gnabar_na = .8*(self.order+1)
             # sec.alphahVHalf_na = -58.
             #sec.betahVHalf_na = -58.
             #sec.alphahK_na = 5.
@@ -246,7 +249,8 @@ class ProbTree(Tree):
             if type(kwargs['root_point']) is float or type(kwargs['root_point']) is int:
                 self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]), record=self.record)
             else:
-                self.root = Segment(start=[0,kwargs['root_point'][1],kwargs['root_point'][2]],end=kwargs['root_point'], record=self.record)
+                self.root = Segment(start=[0, kwargs['root_point'][1], kwargs['root_point'][2]],
+                                    end=kwargs['root_point'], record=self.record)
             kwargs.pop('root_point')
         else:
             self.root = Segment(record=self.record)
@@ -291,8 +295,8 @@ class ProbTree(Tree):
         #     self.delay = helper.inhom_poisson(mod_click, 20., 0., 6.)
 
     def build_logistic(self,
-                       bif_center=5000., bif_sigma=200., bif_amp=500.,
-                       ter_center=5500., ter_sigma=100.,
+                       bif_center=15000., bif_sigma=200., bif_amp=500.,
+                       ter_center=15500., ter_sigma=100.,
                        ang_mean=20., ang_var=5.
     ):
 
