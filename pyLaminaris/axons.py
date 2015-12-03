@@ -100,8 +100,8 @@ class Segment:
             sec.erev_leak = -20.
             sec.g_leak = 1.0e-6
             # sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
-            sec.cm = 0.001  #1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
-            sec.Ra = 50.  #Ra(sec.diam)
+            sec.cm = 0.001  # 1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
+            sec.Ra = 50.  # Ra(sec.diam)
         n = 0
         for sec in self.nodes:
             sec.nseg = 1
@@ -119,7 +119,7 @@ class Segment:
                 sec.gnabar_na = .8
             # sec.gnabar_na = .8*(self.order+1)
             # sec.alphahVHalf_na = -58.
-            #sec.betahVHalf_na = -58.
+            # sec.betahVHalf_na = -58.
             #sec.alphahK_na = 5.
             #sec.betahK_na = 5.
             #sec.alphamVHalf_na = -39.
@@ -181,22 +181,22 @@ class Tree:
     def leaves(self):
         return [s for s in self.segments() if len(s.children) == 0]
 
-    def nodes_imem_loc(self,with_root=True):
+    def nodes_imem_loc(self, with_root=True):
         import numpy as np
 
         segs = self.segments()
         imem = []
         loc = []
-        #exclude first sections of root segment
+        # exclude first sections of root segment
         if segs[0].record:
             imem.extend(segs[0].rec_i_mem[10:])
         else:
             imem.extend(segs[0].get_instantaneous_imem()[10:])
         loc.extend(segs[0].node_locations[10:])
         if with_root:
-          start = 0
+            start = 0
         else:
-          start = 1
+            start = 1
         for s in segs[start:]:
             #TODO: here is where we need to differentiate record or not.
             #FIXME: Should be failing a test!!!!
@@ -209,16 +209,16 @@ class Tree:
 
         return np.array(imem), np.array(loc)
 
-    def draw_2d(self, alpha=1.0,color='b'):
+    def draw_2d(self, alpha=1.0, color='b'):
         from matplotlib import pyplot as plt
         import numpy as np
 
         for s in self.segments():
             l = np.vstack((s.start, s.end))
-            plt.plot(l[:, 0], l[:, 1], 'k',alpha=alpha,color=color)
+            plt.plot(l[:, 0], l[:, 1], 'k', alpha=alpha, color=color)
 
             n = np.vstack(s.node_locations)
-            plt.plot(n[:, 0], n[:, 1], 'k.', alpha=alpha,color=color)
+            plt.plot(n[:, 0], n[:, 1], 'k.', alpha=alpha, color=color)
 
         plt.gca().set_aspect('equal')
 
@@ -264,7 +264,7 @@ class ProbTree(Tree):
         # # self.delay = 1.5 + 0.25*np.random.randn()
         # #FIXME: why is this here?
         # if mode == 'pulse':
-        #     class rv(stats.rv_continuous):
+        # class rv(stats.rv_continuous):
         #         def _pdf(self, x):
         #             return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
         #
@@ -324,7 +324,7 @@ class ProbTree(Tree):
     def build_prob(self, depth=5, p=[1., .9, .7, .5, .5, .4],
                    dir_mean=154., dir_var=77.,
                    ang_mean=25, ang_var=20):
-                   #ang_mean=37.5, ang_var=12.5):
+        # ang_mean=37.5, ang_var=12.5):
         def build_recursive(node, depth, p, dir_mean, dir_var, ang_mean, ang_var):
             if (node.order < depth) and (np.random.rand() < p[node.order]):
                 node.add_branch(
