@@ -46,12 +46,17 @@ class ParallelExperiment:
 class ParallelBundleExperiment:
     """Parallel Experiments can be run with mpirun -np 4 python ..."""
 
-    def __init__(self, population_size=120, stimtype='pulse', **params):
+    def __init__(self, population_size=120, stimtype='pulse', simulation_time=20., **params):
         self.cw = MPI.COMM_WORLD
         self.nhost = int(self.cw.size)
         self.rank = int(self.cw.rank)
         self.stimtype = stimtype
         self.params = params
+        self.simulation_time = simulation_time
+        if "postfix" in params.keys():
+            self.fname = "data/bundle_pulse_"+params['postfix']+".npz"
+        else:
+            self.fname = "data/bundle_pulse.npz"
         self.electrode_params = dict(x_N=30, x_d=20, x_base=0, x_quadscale=True, y_N=300, y_d=20, y_base=10000,
                                      y_quadscale=False)
         if "electrode_params" in params.keys():
@@ -93,8 +98,8 @@ class ParallelBundleExperiment:
         for e in self.electrodes:
             self.exp.add_electrode(e)
 
-    def run(self, t=20., mode='batch', fname='data/parallel_bundle_potential.npz'):
-        self.exp.run(t=t, mode=mode)
+    def run(self, mode='batch'):
+        self.exp.run(t=self.simulation_time, mode=mode)
         print "gathering", self.rank
         nodes = self.cw.gather(self.pop.segment_locations(), root=0)
         pot = [self.cw.gather(e.recorded_potential, root=0) for e in self.electrodes]
@@ -102,6 +107,6 @@ class ParallelBundleExperiment:
         if self.rank == 0:
             loc = [e.location for e in self.electrodes]
             pot = np.sum(pot, axis=1)
-            np.savez(fname, pot=pot, loc=loc, nodes=nodes)
+            np.savez(self.fname, pot=pot, loc=loc, nodes=nodes)
         MPI.Finalize()
 

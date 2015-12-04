@@ -120,8 +120,8 @@ class Segment:
             # sec.gnabar_na = .8*(self.order+1)
             # sec.alphahVHalf_na = -58.
             # sec.betahVHalf_na = -58.
-            #sec.alphahK_na = 5.
-            #sec.betahK_na = 5.
+            # sec.alphahK_na = 5.
+            # sec.betahK_na = 5.
             #sec.alphamVHalf_na = -39.
             #sec.betamVHalf_na = -39.
             #sec.alphamK_na = 5.
@@ -198,8 +198,8 @@ class Tree:
         else:
             start = 1
         for s in segs[start:]:
-            #TODO: here is where we need to differentiate record or not.
-            #FIXME: Should be failing a test!!!!
+            # TODO: here is where we need to differentiate record or not.
+            # FIXME: Should be failing a test!!!!
             if s.record:
                 imem.extend(s.rec_i_mem)
             else:
@@ -258,15 +258,15 @@ class ProbTree(Tree):
         if structure == 'prob':
             self.build_prob(**kwargs)
         elif structure == 'logistic':
-            self.build_logistic(**kwargs)
+            self.build_logistic(**kwargs['logistic_params'])
 
         self.virgin = True
         # # self.delay = 1.5 + 0.25*np.random.randn()
         # #FIXME: why is this here?
         # if mode == 'pulse':
         # class rv(stats.rv_continuous):
-        #         def _pdf(self, x):
-        #             return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
+        # def _pdf(self, x):
+        # return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
         #
         #     myrv = rv()
         #     self.delay = [0.]
@@ -298,7 +298,7 @@ class ProbTree(Tree):
                        bif_center=15000., bif_sigma=200., bif_amp=500.,
                        ter_center=15500., ter_sigma=100.,
                        ang_mean=20., ang_var=5.
-    ):
+                       ):
 
         def bif(x, A, mu, sigma):
             return A / sigma * np.exp((x - mu) / sigma) / (1 + np.exp((x - mu) / sigma)) ** 2

@@ -5,20 +5,21 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes
 
 import matplotlib as mpl
 from scipy import signal
+import json
+import sys
 
-n_rows = 200
-n_cols = 30
 
 
-def get_index(row, col, n_rows=n_rows, n_cols=n_cols):
+def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
-def run_fig1(pot):
+def run_fig1(pot, n_rows, n_cols):
+    fig = plt.figure()
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
           gridspec.GridSpec(10, 14, top=0.48, bottom=0.1)]
 
     dt = 0.0025
-    filt_freq = 2000.
+    filt_freq = params['filt_freq']
 
     filter_type = ['lowpass', 'highpass']
 
@@ -58,7 +59,7 @@ def run_fig1(pot):
             for m in range(3):
                 ax_t = plt.subplot(gs[freq_n][n, 2 * m + 5:2 * m + 7])
                 ax_t.axis('off')
-                index = get_index(36+3*n,2*m) #760 + 60 * n + 2 * m + 1
+                index = get_index(36+3*n,2*m, n_rows, n_cols) #760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
@@ -70,7 +71,7 @@ def run_fig1(pot):
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1,1))))
-        index = [get_index(36+n,2) for n in range(30)]
+        index = [get_index(36+n,2, n_rows, n_cols) for n in range(30)]
         if freq_n == 0:
             amp_line = np.array([fted[n, ft_abs[n, :].argmax()] for n in index])
             amp_line = -amp_line + amp_line.mean()
@@ -138,7 +139,7 @@ def run_fig1(pot):
         plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
 
     # [left, bottom, width, height]
-    cb_ax = plt.gcf().add_axes([0.15, .05, .4, .02])
+    cb_ax = fig.add_axes([0.15, .05, .4, .02])
 
     def form1(x, pos):
         """ This function returns a string with 1 decimal places, given the input x"""
@@ -173,10 +174,7 @@ def run_fig1(pot):
     # t0 = ax_t.get_xlim()[0]
     # sb2_ax.fill([t0, t0, t0 + 5, t0 + 5], [16300, 16350, 16350, 16300], 'k')
     # sb2_ax.text(t0, 16370, '5ms')
-
-    for fmt in ['.png', '.pdf']:
-        plt.savefig('figs/bundle_pulse_potentials' + fmt)
-    plt.close()
+    return fig
 
 
 def run_fig2(pot):
@@ -264,7 +262,7 @@ def run_fig2(pot):
 
     plt.close()
 
-def run_fig2new(pot):
+def run_fig2new(pot, n_rows, n_cols):
     dt = 0.0025
     filt_freq = 2000.
 
@@ -284,7 +282,7 @@ def run_fig2new(pot):
         for m in range(30):
             amps[-1].append([])
             for n in range(200):
-                index = get_index(n,m) #20 * n + m
+                index = get_index(n,m, n_rows, n_cols) #20 * n + m
                 if n == 0:
                     locs[-1].append(pot['loc'][index,:])
                 amps[-1][-1].append(ft_abs[index, 3500:-2499].max())
@@ -292,7 +290,17 @@ def run_fig2new(pot):
     return np.array(amps),np.array(locs)
 
 if __name__ == '__main__':
-    potentials = np.load('data/parallel_bundle_potential.npz')
-    run_fig1(potentials)
+    params = json.load(open(sys.argv[-1]))
+
+    n_rows = params['electrode_params']['y_N']
+    n_cols = params['electrode_params']['x_N']
+
+    fname = "data/bundle_pulse_"+params['postfix']+".npz"
+    potentials = np.load(fname)
+    fig = run_fig1(potentials,n_rows, n_cols)
+    for fmt in ['.png', '.pdf']:
+        fig.savefig('figs/bundle_pulse_potentials_' + params['postfix'] + fmt)
+    plt.show()
+    plt.close(fig)
     #run_fig2(potentials)
-    amps,locs = run_fig2new(potentials)
+    amps,locs = run_fig2new(potentials, n_rows, n_cols)

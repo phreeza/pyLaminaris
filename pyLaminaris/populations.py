@@ -4,14 +4,14 @@ import numpy as np
 
 
 class NMNeuronPopulation:
-    def __init__(self, size=100, side='ipsi', record=True, x_offset=14500., x_spread=200., y_offset=-10., y_spread=20.,
-                 structure='logistic'):
+    def __init__(self, size=100, side='ipsi', record=True, root_x_offset=14500., root_x_spread=200., root_y_offset=-10., y_spread=20.,
+                 structure='logistic', **params):
         self.side = side
         self.size = size
 
-        self.x_offset = x_offset
-        self.x_spread = x_spread
-        self.y_offset = y_offset
+        self.x_offset = root_x_offset
+        self.x_spread = root_x_spread
+        self.y_offset = root_y_offset
         self.y_spread = y_spread
         self.record = record
         self.neurons = [
@@ -20,7 +20,7 @@ class NMNeuronPopulation:
                     self.x_offset + self.x_spread * np.random.rand(),
                     self.y_offset + self.y_spread * np.random.rand(),
                     0.0
-                ], record=self.record, structure=structure) for n in
+                ], record=self.record, structure=structure, **params) for n in
             range(size)]
 
     def set_stimulation(self, stimtype='mod_click', freq=4000.):
