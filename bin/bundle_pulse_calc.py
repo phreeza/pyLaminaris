@@ -1,10 +1,14 @@
-import pyLaminaris.parallel as p
-import sys
-import json
 
-params = json.load(open(sys.argv[-1]))
+def run(fname):
+    import pyLaminaris.parallel as p
+    import json
+    params = json.load(open(fname))
 
-exp = p.ParallelBundleExperiment(**params)
+    exp = p.ParallelBundleExperiment(**params)
 
-exp.setup()
-exp.run()
+    exp.setup()
+    exp.run()
+
+if __name__ == '__main__':
+    import sys
+    run(sys.argv[-1])

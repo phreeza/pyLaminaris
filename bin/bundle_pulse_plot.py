@@ -1,9 +1,10 @@
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.gridspec as gridspec
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes
 
-import matplotlib as mpl
 from scipy import signal
 import json
 import sys
@@ -13,7 +14,7 @@ import sys
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
-def run_fig1(pot, n_rows, n_cols):
+def run_fig1(pot, n_rows, n_cols, **params):
     fig = plt.figure()
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
           gridspec.GridSpec(10, 14, top=0.48, bottom=0.1)]
@@ -289,18 +290,21 @@ def run_fig2new(pot, n_rows, n_cols):
                 # amps[-1][-1].append(fted[index,3500:-2499].std())
     return np.array(amps),np.array(locs)
 
-if __name__ == '__main__':
-    params = json.load(open(sys.argv[-1]))
+    
+def run(params_fname):
+    params = json.load(open(params_fname))
 
     n_rows = params['electrode_params']['y_N']
     n_cols = params['electrode_params']['x_N']
 
     fname = "data/bundle_pulse_"+params['postfix']+".npz"
     potentials = np.load(fname)
-    fig = run_fig1(potentials,n_rows, n_cols)
+    fig = run_fig1(potentials,n_rows, n_cols, **params)
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/bundle_pulse_potentials_' + params['postfix'] + fmt)
-    plt.show()
     plt.close(fig)
     #run_fig2(potentials)
-    amps,locs = run_fig2new(potentials, n_rows, n_cols)
+    #amps,locs = run_fig2new(potentials, n_rows, n_cols)
+
+if __name__ == '__main__':
+    run(sys.argv[-1])

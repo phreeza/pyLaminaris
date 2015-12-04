@@ -1,8 +1,8 @@
 {
     "param_type":"parallel_bundle",
     "filt_freq":2000.0,
-    "n_jobs":25,
-    "postfix":"standard",
+    "postfix":"straight",
+    "n_jobs":27,
     "population_size":50,
     "simulation_time":20.0,
     "electrode_params":
@@ -31,8 +31,8 @@
             "bif_amp":500.0,
             "ter_center":15500.0,
             "ter_sigma":100.0,
-            "ang_mean":20.0,
-            "ang_var":5.0
+            "ang_mean":0.0,
+            "ang_var":0.0
         }
     }
 }
