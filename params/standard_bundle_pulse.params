@@ -1,9 +1,9 @@
 {
     "param_type":"parallel_bundle",
     "filt_freq":2000.0,
-    "n_jobs":25,
     "postfix":"standard",
-    "population_size":50,
+    "n_jobs":35,
+    "population_size":500,
     "simulation_time":20.0,
     "electrode_params":
     {
