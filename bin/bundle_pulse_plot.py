@@ -1,4 +1,5 @@
 import matplotlib as mpl
+
 mpl.use('Agg')
 import matplotlib.gridspec as gridspec
 import numpy as np
@@ -10,9 +11,9 @@ import json
 import sys
 
 
-
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
+
 
 def run_fig1(pot, n_rows, n_cols, **params):
     fig = plt.figure()
@@ -48,7 +49,7 @@ def run_fig1(pot, n_rows, n_cols, **params):
         # m = 900+(n%10)*40+2*int(n/10)+1
         # plt.plot(psds[m,:])
         # #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
-        #    plt.semilogy()
+        # plt.semilogy()
         #
         #for fmt in ['.png', '.pdf']:
         #    plt.savefig('figs/bundle_pulse_psds' + fmt)
@@ -60,31 +61,32 @@ def run_fig1(pot, n_rows, n_cols, **params):
             for m in range(3):
                 ax_t = plt.subplot(gs[freq_n][n, 2 * m + 5:2 * m + 7])
                 ax_t.axis('off')
-                index = get_index(36+3*n,2*m, n_rows, n_cols) #760 + 60 * n + 2 * m + 1
+                index = get_index(36 + 3 * n, m + 4, n_rows, n_cols)  # 760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
                 lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
                 dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
+                ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
                 #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
 
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
-        ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1,1))))
-        index = [get_index(36+n,2, n_rows, n_cols) for n in range(30)]
+        ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
+        index = [get_index(36 + n, 2, n_rows, n_cols) for n in range(30)]
         if freq_n == 0:
             amp_line = np.array([fted[n, ft_abs[n, :].argmax()] for n in index])
             amp_line = -amp_line + amp_line.mean()
-            amp_line = 3*amp_line/amp_line.max()
+            amp_line = 3 * amp_line / amp_line.max()
         else:
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
-            amp_line = 15*amp_line/amp_line.max()
+            amp_line = 15 * amp_line / amp_line.max()
 
         locs_line = pot['loc'][index, 0]
 
-        ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_cols, -1)), pot['loc'][:, 0].reshape((n_cols, -1)),
-                            amps.reshape((n_cols, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
+        ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_rows, -1)), pot['loc'][:, 0].reshape((n_rows, -1)),
+                            amps.reshape((n_rows, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -129,7 +131,7 @@ def run_fig1(pot, n_rows, n_cols, **params):
             plt.xticks(np.arange(0, 18, 4))
             plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
 
-        plt.plot(amp_line, locs_line,lw=2,color='r')
+        plt.plot(amp_line, locs_line, lw=2, color='r')
 
         plt.setp(ax1[freq_n].get_yticklabels(), visible=False)
         #plt.setp(ax2[freq_n].get_yticklabels(), visible=False)
@@ -204,7 +206,7 @@ def run_fig2(pot):
     plt.plot([1e1, 1e5], 11 * np.array([5e0, 5e-8]), color='k', linestyle='dotted')
 
     # for n in np.arange(-20,20,0.5):
-    #     plt.plot([1e0,1e5],10**n*np.array([1e0,1e-5]),color='k',alpha=0.1)
+    # plt.plot([1e0,1e5],10**n*np.array([1e0,1e-5]),color='k',alpha=0.1)
     #     plt.plot([1e0,1e5],10**n*np.array([1e0,1e-10]),color='k',alpha=0.1)
 
     n = 5
@@ -235,10 +237,10 @@ def run_fig2(pot):
 
     slopes = np.array([[np.polyfit(np.log(pot['loc'][n * 20 + 1:n * 20 + 20, 1]),
                                    np.log(psds[n * 20 + 1:n * 20 + 20, m:m + 20].mean(axis=1)), 1)[0] for m in
-                        range(psds.shape[-1]-20)] for n in range(30, 60)])
+                        range(psds.shape[-1] - 20)] for n in range(30, 60)])
     plt.subplot(axarr[:, 12:])
-    plt.plot(psd_freqs[1:slopes.shape[1]+1], slopes.mean(axis=0))
-    plt.fill_between(psd_freqs[1:slopes.shape[1]+1], slopes.mean(axis=0) + slopes.std(axis=0),
+    plt.plot(psd_freqs[1:slopes.shape[1] + 1], slopes.mean(axis=0))
+    plt.fill_between(psd_freqs[1:slopes.shape[1] + 1], slopes.mean(axis=0) + slopes.std(axis=0),
                      slopes.mean(axis=0) - slopes.std(axis=0), alpha=0.2)
     plt.semilogx()
     plt.xlim(psd_freqs[1], psd_freqs[slopes.shape[1]])
@@ -263,6 +265,7 @@ def run_fig2(pot):
 
     plt.close()
 
+
 def run_fig2new(pot, n_rows, n_cols):
     dt = 0.0025
     filt_freq = 2000.
@@ -280,31 +283,32 @@ def run_fig2new(pot, n_rows, n_cols):
         fted = signal.lfilter(b, a, pot['pot'], axis=1)
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
 
-        for m in range(30):
+        for m in range(n_cols):
             amps[-1].append([])
-            for n in range(200):
-                index = get_index(n,m, n_rows, n_cols) #20 * n + m
+            for n in range(n_rows):
+                index = get_index(n, m, n_rows, n_cols)  # 20 * n + m
                 if n == 0:
-                    locs[-1].append(pot['loc'][index,:])
+                    locs[-1].append(pot['loc'][index, :])
                 amps[-1][-1].append(ft_abs[index, 3500:-2499].max())
                 # amps[-1][-1].append(fted[index,3500:-2499].std())
-    return np.array(amps),np.array(locs)
+    return np.array(amps), np.array(locs)
 
-    
+
 def run(params_fname):
     params = json.load(open(params_fname))
 
     n_rows = params['electrode_params']['y_N']
     n_cols = params['electrode_params']['x_N']
 
-    fname = "data/bundle_pulse_"+params['postfix']+".npz"
+    fname = "data/bundle_pulse_" + params['postfix'] + ".npz"
     potentials = np.load(fname)
-    fig = run_fig1(potentials,n_rows, n_cols, **params)
+    fig = run_fig1(potentials, n_rows, n_cols, **params)
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/bundle_pulse_potentials_' + params['postfix'] + fmt)
     plt.close(fig)
-    #run_fig2(potentials)
-    #amps,locs = run_fig2new(potentials, n_rows, n_cols)
+    # run_fig2(potentials)
+    amps, locs = run_fig2new(potentials, n_rows, n_cols)
+
 
 if __name__ == '__main__':
     run(sys.argv[-1])
