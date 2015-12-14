@@ -61,27 +61,26 @@ def run_fig1(pot, n_rows, n_cols, **params):
             for m in range(3):
                 ax_t = plt.subplot(gs[freq_n][n, 2 * m + 5:2 * m + 7])
                 ax_t.axis('off')
-                index = get_index(36 + 3 * n, m + 4, n_rows, n_cols)  # 760 + 60 * n + 2 * m + 1
+                index = get_index(36 + 3 * n, 2 * m + 4, n_rows, n_cols)  # 760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
                 lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
                 dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
-                ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
+                # ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
                 #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
 
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
-        index = [get_index(36 + n, 2, n_rows, n_cols) for n in range(30)]
+        index = [get_index(36 + n, 3, n_rows, n_cols) for n in range(30)]
         if freq_n == 0:
             amp_line = np.array([fted[n, ft_abs[n, :].argmax()] for n in index])
             amp_line = -amp_line + amp_line.mean()
-            amp_line = 3 * amp_line / amp_line.max()
         else:
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
-            amp_line = 15 * amp_line / amp_line.max()
+        amp_line = amp_line / 1e6
 
         locs_line = pot['loc'][index, 0]
 
@@ -130,8 +129,8 @@ def run_fig1(pot, n_rows, n_cols, **params):
             ax3[freq_n].tick_params(left="off")
             plt.xticks(np.arange(0, 18, 4))
             plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
-
-        plt.plot(amp_line, locs_line, lw=2, color='r')
+        ax3_twin = ax3[freq_n].twiny()
+        ax3_twin.plot(amp_line, locs_line, lw=2, color='r')
 
         plt.setp(ax1[freq_n].get_yticklabels(), visible=False)
         #plt.setp(ax2[freq_n].get_yticklabels(), visible=False)

@@ -1,5 +1,6 @@
 __author__ = 'mccolgan'
-
+import matplotlib as mpl
+mpl.use('Agg')
 
 def task_simple_binaural_click():
     '''Timecourses of features over long time courses'''
@@ -43,7 +44,7 @@ def task_parallel_bundle():
 
         yield {
             'name': 'plot_'+postfix,
-            'actions': [(p.run,fname)],
+            'actions': [(p.run,[fname])],
             'targets': ['figs/bundle_pulse_potentials_'+postfix+'.png', 
                         'figs/bundle_pulse_potentials_'+postfix+'.pdf'],
             'file_dep': ['bin/bundle_pulse_plot.py', 'data/bundle_pulse_'+postfix+'.npz']
