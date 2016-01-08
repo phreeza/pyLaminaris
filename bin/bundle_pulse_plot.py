@@ -1,6 +1,6 @@
 import matplotlib as mpl
 
-mpl.use('Agg')
+#mpl.use('Agg')
 import matplotlib.gridspec as gridspec
 import numpy as np
 from matplotlib import pyplot as plt
@@ -66,8 +66,8 @@ def run_fig1(pot, n_rows, n_cols, **params):
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500] - fted[index, :].mean())[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
-                lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
-                dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1000000.)))
+                lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1e6)))
+                dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1e6)))
                 # ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
                 #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
 
@@ -85,7 +85,7 @@ def run_fig1(pot, n_rows, n_cols, **params):
         locs_line = pot['loc'][index, 0]
 
         ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_rows, -1)), pot['loc'][:, 0].reshape((n_rows, -1)),
-                            amps.reshape((n_rows, -1)) / (scalemax * 1000000.), 0.7 ** np.arange(7), cmap=plt.cm.jet,
+                            amps.reshape((n_rows, -1)) / (scalemax * 1e6), 0.7 ** np.arange(7), cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -133,11 +133,11 @@ def run_fig1(pot, n_rows, n_cols, **params):
         ax3_twin.plot(amp_line, locs_line, lw=2, color='r')
 
         plt.setp(ax1[freq_n].get_yticklabels(), visible=False)
-        #plt.setp(ax2[freq_n].get_yticklabels(), visible=False)
+        # plt.setp(ax2[freq_n].get_yticklabels(), visible=False)
         plt.setp(ax3[freq_n].get_yticklabels(), visible=False)
         plt.setp(ax1[freq_n].get_xticklabels(), visible=False)
-        #plt.setp( ax2[freq_n].get_xticklabels(), visible=False)
-        #plt.setp( ax3[freq_n].get_xticklabels(), visible=False)
+        # plt.setp( ax2[freq_n].get_xticklabels(), visible=False)
+        # plt.setp( ax3[freq_n].get_xticklabels(), visible=False)
         plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
 
     # [left, bottom, width, height]
@@ -273,6 +273,9 @@ def run_fig2new(pot, n_rows, n_cols):
 
     scalemax = 1.0
 
+    plot_row = 42
+    plot_t = 900
+
     locs = []
     amps = []
     for freq_n in range(2):
@@ -280,17 +283,71 @@ def run_fig2new(pot, n_rows, n_cols):
         amps.append([])
         b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
         fted = signal.lfilter(b, a, pot['pot'], axis=1)
+        fted = fted-fted.mean(axis=1).reshape((-1, 1))
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
 
         for m in range(n_cols):
             amps[-1].append([])
+            locs[-1].append([])
             for n in range(n_rows):
                 index = get_index(n, m, n_rows, n_cols)  # 20 * n + m
-                if n == 0:
-                    locs[-1].append(pot['loc'][index, :])
-                amps[-1][-1].append(ft_abs[index, 3500:-2499].max())
+                locs[-1][-1].append(pot['loc'][index, :])
+                amps[-1][-1].append(fted[index, 4000:6000])
                 # amps[-1][-1].append(fted[index,3500:-2499].std())
-    return np.array(amps), np.array(locs)
+    #return np.array(amps), np.array(locs)
+    amps = np.array(amps)
+    locs = np.array(locs)
+
+    def norm(a):
+        return a/np.max(np.abs(a).squeeze(),axis=1)[:,np.newaxis]
+    fig = plt.figure()
+    ax1 = plt.subplot(221)
+    plt.plot(norm(amps[0,1::5,:,plot_t]).T)
+    plt.vlines(plot_row,-1,1)
+    ax1 = plt.subplot(222)
+    plt.plot(norm(amps[0,1::5,plot_row,:]).T)
+    plt.vlines(plot_t,-1,1)
+    ax1 = plt.subplot(223)
+    plt.plot(norm(amps[1,1::5,:,plot_t]).T)
+    plt.vlines(plot_row+17,-1,1)
+    ax1 = plt.subplot(224)
+    plt.plot(norm(amps[1,1::5,plot_row+17,:]).T)
+    plt.vlines(plot_t,-1,1)
+    plt.savefig('diag.png')
+    plt.show()
+    plt.close(fig)
+
+    fig = plt.figure()
+    ax1 = plt.subplot(221)
+    plt.plot(locs[0,0,100:,0]-20000,amps[0,0,100:,plot_t]/amps[0,0,100,plot_t],label='low-pass')
+    plt.plot(locs[0,0,100:,0]-20000,amps[1,0,100:,plot_t]/amps[1,0,100,plot_t],label='high-pass')
+
+    plt.ylabel('amplitude (normalized)')
+    ax2 = plt.subplot(222, sharey=ax1)
+    plt.plot(locs[0,:,0,1],amps[0,:,plot_row,plot_t]/amps[0,0,plot_row,plot_t],label='low-pass')
+    plt.plot(locs[0,:,0,1],amps[1,:,plot_row+17,plot_t]/amps[1,0,plot_row+17,plot_t],label='high-pass')
+    plt.legend()
+
+    ax3 = plt.subplot(223, sharex=ax1)
+    plt.plot(locs[0,0,100:,0]-20000,amps[1,0,100:,plot_t]/amps[1,0,100,plot_t]/(amps[0,0,100:,plot_t]/amps[0,0,100,plot_t]),color='r')
+    plt.xlabel('axial distance [um]')
+    plt.ylabel('amplitude ratio (normalized)')
+    plt.xlim(0,10000)
+    ax4 = plt.subplot(224, sharex=ax2,sharey=ax3)
+    plt.plot(locs[0,:,0,1],(amps[1,:,plot_row+17,plot_t]/amps[1,0,plot_row+17,plot_t])/(amps[0,:,plot_row,plot_t]/amps[0,0,plot_row,plot_t]),color='r')
+    plt.xlabel('radial distance [um]')
+    plt.ylim(0,1)
+    plt.xlim(0,10000)
+
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.setp(ax2.get_yticklabels(), visible=False)
+    plt.setp(ax4.get_yticklabels(), visible=False)
+    ax3.set_xticks(np.arange(0,15000,5000))
+    ax4.set_xticks(np.arange(0,15000,5000))
+    #ax1.set_yticks([0.2, 0.55, 0.76])
+    fig.subplots_adjust(hspace=0.05, wspace = 0.03)
+    return fig
 
 
 def run(params_fname):
@@ -306,8 +363,11 @@ def run(params_fname):
         fig.savefig('figs/bundle_pulse_potentials_' + params['postfix'] + fmt)
     plt.close(fig)
     # run_fig2(potentials)
-    amps, locs = run_fig2new(potentials, n_rows, n_cols)
-
+    #amps, locs = run_fig2new(potentials, n_rows, n_cols)
+    fig = run_fig2new(potentials, n_rows, n_cols)
+    for fmt in ['.png', '.pdf']:
+        fig.savefig('figs/bundle_pulse_scalings_' + params['postfix'] + fmt)
+    plt.close(fig)
 
 if __name__ == '__main__':
     run(sys.argv[-1])
