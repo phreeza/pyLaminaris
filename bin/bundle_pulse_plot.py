@@ -265,16 +265,13 @@ def run_fig2(pot):
     plt.close()
 
 
-def run_fig2new(pot, n_rows, n_cols):
+def run_fig2new(pot, n_rows, n_cols, plot_row_lf = 42, plot_row_hf = 59, plot_col = 100, plot_t = 900):
     dt = 0.0025
     filt_freq = 2000.
 
     filter_type = ['lowpass', 'highpass']
 
     scalemax = 1.0
-
-    plot_row = 42
-    plot_t = 900
 
     locs = []
     amps = []
@@ -296,55 +293,115 @@ def run_fig2new(pot, n_rows, n_cols):
                 # amps[-1][-1].append(fted[index,3500:-2499].std())
     #return np.array(amps), np.array(locs)
     amps = np.array(amps)
+    amps_psd = np.sum(amps**2,axis=3)
     locs = np.array(locs)
 
     def norm(a):
         return a/np.max(np.abs(a).squeeze(),axis=1)[:,np.newaxis]
+    def norm_first(x):
+        return x/x[0]
+    #fig = plt.figure()
+    #ax1 = plt.subplot(221)
+    #plt.plot(norm(amps[0,1::5,:,plot_t]).T)
+    #plt.vlines(plot_row_lf,-1,1)
+    #ax1 = plt.subplot(222)
+    #plt.plot(norm(amps[0,1::5,plot_row_lf,:]).T)
+    #plt.vlines(plot_t,-1,1)
+    #ax1 = plt.subplot(223)
+    #plt.plot(norm(amps[1,1::5,:,plot_t]).T)
+    #plt.vlines(plot_row_hf,-1,1)
+    #ax1 = plt.subplot(224)
+    #plt.plot(norm(amps[1,1::5,plot_row_hf,:]).T)
+    #plt.vlines(plot_t,-1,1)
+    #plt.savefig('diag.png')
+    #plt.show()
+    #plt.close(fig)
+
+    #import matplotlib.animation as manimation
+
+    #FFMpegWriter = manimation.writers['ffmpeg']
+    #metadata = dict(title='Movie Test', artist='Matplotlib',
+    #                comment='Movie support!')
+    #writer = FFMpegWriter(fps=15, metadata=metadata)
+
+
+    #fig = plt.figure()
+    #plt.subplot(311)
+    #plt.title('low-f')
+    #i1 = plt.imshow(norm(amps[0,:,:,plot_t]).T,aspect='auto',interpolation='nearest')
+    #plt.xlabel('radial')
+    #plt.ylabel('axial')
+    #plt.subplot(312)
+    #plt.title('high-f')
+    #i2 = plt.imshow(norm(amps[1,:,:,plot_t]).T,aspect='auto',interpolation='nearest')
+    #plt.xlabel('radial')
+    #plt.ylabel('axial')
+
+    #fig = plt.figure()
+    #plt.subplot(311)
+    #plt.title('low-f')
+    #i2 = plt.imshow(np.log(np.sum(amps[0,:,:,:]**2,axis=2)).T,aspect='auto',interpolation='nearest')
+    #plt.xlabel('radial')
+    #plt.ylabel('axial')
+    #plt.subplot(312)
+    #plt.title('high-f')
+    #i2 = plt.imshow(np.log(np.sum(amps[1,:,:,:]**2,axis=2)).T,aspect='auto',interpolation='nearest')
+    #plt.xlabel('radial')
+    #plt.ylabel('axial')
+
+    #plt.subplot(313)
+    #plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],norm_first(np.sum(amps[1,0,plot_col:,:]**2,axis=1).squeeze()),label='high-pass')
+    #plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],norm_first(np.sum(amps[0,0,plot_col:,:]**2,axis=1).squeeze()),label='low-pass')
+    #plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],norm_first(np.sum(amps[1,0,plot_col:,:]**2,axis=1).squeeze())/norm_first(np.sum(amps[0,0,plot_col:,:]**2,axis=1).squeeze()),label='ratio')
+    #plt.legend()
+    ##i4, = plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],amps[1,0,plot_col:,plot_t]/amps[1,0,plot_col,plot_t],label='high-pass')
+    ##plt.ylim(0,1)
+    #plt.show()
+    #plt.close(fig)
+
+    #with writer.saving(fig, "writer_test.mp4", 100):
+    #    for i in range(500,1000):
+    #        i1.set_data(norm(amps[0,:,:,i]).T)
+    #        i2.set_data(norm(amps[1,:,:,i]).T)
+    #        i3.set_data(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],amps[0,0,plot_col:,i]/amps[0,0,plot_col,i])
+    #        i4.set_data(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],amps[1,0,plot_col:,i]/amps[1,0,plot_col,i])
+    #        writer.grab_frame()
+
+
+    
     fig = plt.figure()
     ax1 = plt.subplot(221)
-    plt.plot(norm(amps[0,1::5,:,plot_t]).T)
-    plt.vlines(plot_row,-1,1)
-    ax1 = plt.subplot(222)
-    plt.plot(norm(amps[0,1::5,plot_row,:]).T)
-    plt.vlines(plot_t,-1,1)
-    ax1 = plt.subplot(223)
-    plt.plot(norm(amps[1,1::5,:,plot_t]).T)
-    plt.vlines(plot_row+17,-1,1)
-    ax1 = plt.subplot(224)
-    plt.plot(norm(amps[1,1::5,plot_row+17,:]).T)
-    plt.vlines(plot_t,-1,1)
-    plt.savefig('diag.png')
-    plt.show()
-    plt.close(fig)
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-10,0],norm_first(amps_psd[0,0,plot_col:]),label='low-pass')
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-10,0],norm_first(amps_psd[1,0,plot_col:]),label='high-pass')
 
-    fig = plt.figure()
-    ax1 = plt.subplot(221)
-    plt.plot(locs[0,0,100:,0]-20000,amps[0,0,100:,plot_t]/amps[0,0,100,plot_t],label='low-pass')
-    plt.plot(locs[0,0,100:,0]-20000,amps[1,0,100:,plot_t]/amps[1,0,100,plot_t],label='high-pass')
-
-    plt.ylabel('amplitude (normalized)')
-    ax2 = plt.subplot(222, sharey=ax1)
-    plt.plot(locs[0,:,0,1],amps[0,:,plot_row,plot_t]/amps[0,0,plot_row,plot_t],label='low-pass')
-    plt.plot(locs[0,:,0,1],amps[1,:,plot_row+17,plot_t]/amps[1,0,plot_row+17,plot_t],label='high-pass')
+    plt.ylabel('power (normalized)')
+    plt.loglog()
+    ax2 = plt.subplot(222)
+    #ax2 = plt.subplot(222, sharey=ax1)
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,:,plot_row_lf]),label='low-pass')
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,:,plot_row_hf]),label='high-pass')
     plt.legend()
+    plt.loglog()
 
     ax3 = plt.subplot(223, sharex=ax1)
-    plt.plot(locs[0,0,100:,0]-20000,amps[1,0,100:,plot_t]/amps[1,0,100,plot_t]/(amps[0,0,100:,plot_t]/amps[0,0,100,plot_t]),color='r')
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col,0],norm_first(amps_psd[1,0,plot_col:])/norm_first(amps_psd[0,0,plot_col:]),color='r')
     plt.xlabel('axial distance [um]')
-    plt.ylabel('amplitude ratio (normalized)')
-    plt.xlim(0,10000)
-    ax4 = plt.subplot(224, sharex=ax2,sharey=ax3)
-    plt.plot(locs[0,:,0,1],(amps[1,:,plot_row+17,plot_t]/amps[1,0,plot_row+17,plot_t])/(amps[0,:,plot_row,plot_t]/amps[0,0,plot_row,plot_t]),color='r')
+    plt.ylabel('power ratio (normalized)')
+    #plt.xlim(0,10000)
+    plt.loglog()
+    ax4 = plt.subplot(224, sharex=ax2)
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,:,plot_row_hf])/norm_first(amps_psd[0,:,plot_row_lf]),color='r')
     plt.xlabel('radial distance [um]')
-    plt.ylim(0,1)
-    plt.xlim(0,10000)
+    plt.loglog()
+    #plt.ylim(0,1.1)
+    #plt.xlim(0,10000)
 
     plt.setp(ax1.get_xticklabels(), visible=False)
     plt.setp(ax2.get_xticklabels(), visible=False)
     plt.setp(ax2.get_yticklabels(), visible=False)
     plt.setp(ax4.get_yticklabels(), visible=False)
-    ax3.set_xticks(np.arange(0,15000,5000))
-    ax4.set_xticks(np.arange(0,15000,5000))
+    #ax3.set_xticks(np.arange(0,15000,5000))
+    #ax4.set_xticks(np.arange(0,15000,5000))
     #ax1.set_yticks([0.2, 0.55, 0.76])
     fig.subplots_adjust(hspace=0.05, wspace = 0.03)
     return fig
@@ -355,6 +412,7 @@ def run(params_fname):
 
     n_rows = params['electrode_params']['y_N']
     n_cols = params['electrode_params']['x_N']
+    n_cols = params['electrode_params']['x_N']
 
     fname = "data/bundle_pulse_" + params['postfix'] + ".npz"
     potentials = np.load(fname)
@@ -364,7 +422,9 @@ def run(params_fname):
     plt.close(fig)
     # run_fig2(potentials)
     #amps, locs = run_fig2new(potentials, n_rows, n_cols)
-    fig = run_fig2new(potentials, n_rows, n_cols)
+    fig = run_fig2new(potentials, n_rows, n_cols, 
+                      params['plot_row_lf'], params['plot_row_hf'],
+                      params['plot_col'], params['plot_t'])
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/bundle_pulse_scalings_' + params['postfix'] + fmt)
     plt.close(fig)

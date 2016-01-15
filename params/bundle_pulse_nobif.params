@@ -19,8 +19,8 @@
     "stimtype":"pulse",
     "population_params":
     {
-        "root_x_offset":14500.0,
-        "root_x_spread":200.0,
+        "root_x_offset":15500.0,
+        "root_x_spread":100.0,
         "root_y_offset":-10.0,
         "root_y_spread":20.0,
         "structure":"logistic",
@@ -34,5 +34,9 @@
             "ang_mean":0.0,
             "ang_var":0.0
         }
-    }
+    },
+    "plot_row_lf": 30,
+    "plot_row_hf": 30,
+    "plot_col": 90,
+    "plot_t": 885
 }
