@@ -188,7 +188,7 @@ def run(params_fname):
     potentials = np.load(fname)
     fig = run_fig1(potentials, n_rows, n_cols, **params)
     for fmt in ['.png', '.pdf']:
-        fig.savefig('figs/bundle_pulse_potentials_' + params['postfix'] + fmt)
+        fig.savefig('figs/manuscript_fig1_' + params['postfix'] + fmt)
     plt.close(fig)
 
 if __name__ == '__main__':
