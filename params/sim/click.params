@@ -3,7 +3,7 @@
     "filt_freq":2000.0,
     "postfix":"click",
     "n_jobs":35,
-    "population_size":5000,
+    "population_size":50000,
     "simulation_time":20.0,
     "electrode_params":
     {
