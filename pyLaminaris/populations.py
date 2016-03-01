@@ -2,7 +2,6 @@ __author__ = 'mccolgan'
 import neurons as _neurons
 import numpy as np
 
-
 class NMNeuronPopulation:
     def __init__(self, size=100, side='ipsi', record=True, root_x_offset=14500., root_x_spread=200., root_y_offset=-10., y_spread=20.,
                  structure='logistic', **params):
@@ -71,3 +70,19 @@ class NMNeuronPopulation:
     def draw_2d(self, thin=10):
         for n in self.neurons[::thin]:
             n.axon.draw_2d(alpha=0.1)
+
+class SimpleNeuronPopulation(NMNeuronPopulation):
+    def __init__(self, size=1, record=True, mtype='long' **params):
+        self.size = size
+        assert mtype in ['long','short','bif']
+        self.mtype = mtype
+        self.record   = record
+        self.neurons  = [
+            _neurons.SimpleNeuron(record=self.record, mtype=self.mtype, **params) for n in
+            range(size)]
+
+    def set_stimulation(self):
+        import helper
+
+        for n in self.neurons:
+            n.set_spiketimes([10.])

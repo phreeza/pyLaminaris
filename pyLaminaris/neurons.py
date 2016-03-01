@@ -25,3 +25,10 @@ class NMNeuron:
 
     def nodes_imem_loc(self):
         return self.axon.nodes_imem_loc()
+
+class SimpleNeuron(NMNeuron):
+    def __init__(self, mtype, record=True, **params):
+        self.record = record
+        self.axon = axons.SimpleTree(mtype=mtype, record=self.record, **params)
+        self.spiketimes = []
+        self.stims = []

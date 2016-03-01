@@ -55,30 +55,30 @@ def run_fig2(pot_bif, pot_nobif, n_rows, n_cols, plot_row_lf = 42, plot_row_hf =
     fig = plt.figure()
     ax1 = plt.subplot(141)
     plot_loc_offset = 0
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,0,0,plot_col:]),label='low-pass')
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,1,0,plot_col:]),label='high-pass')
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,0,0,plot_col:]),label='low-pass',lw=2)
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,1,0,plot_col:]),label='high-pass',lw=2)
 
     plt.loglog()
     plt.ylabel('power (normalized)')
     plt.xlabel('axial distance [um]')
     
     ax2 = plt.subplot(143,sharex=ax1,sharey=ax1)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,0,:,plot_row_lf]),label='low-pass')
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,1,:,plot_row_hf]),label='high-pass')
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,0,:,plot_row_lf]),label='low-pass',lw=2)
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,1,:,plot_row_hf]),label='high-pass',lw=2)
     plt.xlabel('radial distance [um]')
     plt.loglog()
 
     ax3 = plt.subplot(142,sharex=ax1,sharey=ax1)
     plot_loc_offset = 0
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,0,0,plot_col:]),label='low-pass')
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,1,0,plot_col:]),label='high-pass')
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,0,0,plot_col:]),label='low-pass',lw=2)
+    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,1,0,plot_col:]),label='high-pass',lw=2)
     plt.legend(loc=3,bbox_to_anchor=(-0.95, .02))
 
     plt.loglog()
     #plt.xlabel('axial distance [um]')
     ax4 = plt.subplot(144,sharex=ax1,sharey=ax1)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,0,:,plot_row_lf]),label='low-pass')
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,1,:,plot_row_hf]),label='high-pass')
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,0,:,plot_row_lf]),label='low-pass',lw=2)
+    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,1,:,plot_row_hf]),label='high-pass',lw=2)
     #plt.xlabel('radial distance [um]')
     plt.loglog()
 

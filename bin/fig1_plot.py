@@ -37,11 +37,12 @@ def run_fig1(pot, n_rows, n_cols, **params):
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
 
         node_locs = []
-        for ngroup in pot['nodes']:
-            for segment in ngroup[0]:
-                segment = np.array(segment)
-                node_locs.append(segment)
-                ax1[freq_n].plot(segment[:, 1], segment[:, 0], color='k', alpha=0.1)
+        #for ngroup in pot['nodes'][:1]:
+        ngroup =  pot['nodes'][0]
+        for segment in ngroup[0]:
+            segment = np.array(segment)
+            node_locs.append(segment)
+            ax1[freq_n].plot(segment[:, 1], segment[:, 0], color='k', alpha=1.0)
 
         # for n in range(70):
         # plt.subplot(gs[n%10,int(n/10)+3])

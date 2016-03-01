@@ -188,11 +188,11 @@ class Tree:
         imem = []
         loc = []
         # exclude first sections of root segment
-        if segs[0].record:
-            imem.extend(segs[0].rec_i_mem[10:])
-        else:
-            imem.extend(segs[0].get_instantaneous_imem()[10:])
-        loc.extend(segs[0].node_locations[10:])
+        #if segs[0].record:
+        #    imem.extend(segs[0].rec_i_mem[10:])
+        #else:
+        #    imem.extend(segs[0].get_instantaneous_imem()[10:])
+        #loc.extend(segs[0].node_locations[10:])
         if with_root:
             start = 0
         else:
