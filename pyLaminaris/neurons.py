@@ -29,6 +29,12 @@ class NMNeuron:
 class SimpleNeuron(NMNeuron):
     def __init__(self, mtype, record=True, **params):
         self.record = record
-        self.axon = axons.SimpleTree(mtype=mtype, record=self.record, **params)
+        self.mtype = mtype
+        if mtype == 'bif':
+            self.axon = axons.Tree(depth=1,root_point=np.array([10000.,0.,0.]), record=self.record, **params)
+        elif mtype == 'long':
+            self.axon = axons.Tree(depth=0,root_point=np.array([20000.,0.,0.]), record=self.record, **params)
+        elif mtype == 'pop_sync':
+            self.axon = axons.Tree(depth=1,root_point=np.array([9500.+1000.*np.random.random(),0.,0.]), record=self.record,mtype=mtype, **params)
         self.spiketimes = []
         self.stims = []

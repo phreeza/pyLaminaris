@@ -54,7 +54,7 @@ class NMNeuronPopulation:
             iloc.append(iloc_n)
         imem = np.vstack(imem)
         iloc = np.vstack(iloc)
-        if self.side == 'contra':
+        if hasattr(self,'side') and self.side == 'contra':
             iloc[:, 0] = 2 * (self.x_offset + self.x_spread) - iloc[:, 0]
         return imem, iloc
 
@@ -72,9 +72,9 @@ class NMNeuronPopulation:
             n.axon.draw_2d(alpha=0.1)
 
 class SimpleNeuronPopulation(NMNeuronPopulation):
-    def __init__(self, size=1, record=True, mtype='long' **params):
+    def __init__(self, size=1, record=True, mtype='long', **params):
         self.size = size
-        assert mtype in ['long','short','bif']
+        assert mtype in ['long','bif','pop_sync']
         self.mtype = mtype
         self.record   = record
         self.neurons  = [
@@ -85,4 +85,5 @@ class SimpleNeuronPopulation(NMNeuronPopulation):
         import helper
 
         for n in self.neurons:
-            n.set_spiketimes([10.])
+            #n.set_spiketimes([10.])
+            n.set_spiketimes([1.])

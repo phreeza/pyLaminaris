@@ -98,9 +98,9 @@ class Segment:
             sec.insert('extracellular')
 
             sec.erev_leak = -20.
-            sec.g_leak = 1.0e-6
+            sec.g_leak = 1e-6
             # sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
-            sec.cm = 0.001  # 1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
+            sec.cm = 1e-3  # 1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
             sec.Ra = 50.  # Ra(sec.diam)
         n = 0
         for sec in self.nodes:
@@ -109,19 +109,19 @@ class Segment:
             sec.diam = diam_node
 
             sec.insert('leak')
-            sec.insert('na')
+            sec.insert('nahh')
             sec.insert('klva')
             sec.insert('khva')
             sec.insert('extracellular')
             if n == 0:
-                sec.gnabar_na = 2.4
+                sec.gnabar_nahh = .8#2.4
             else:
-                sec.gnabar_na = .8
+                sec.gnabar_nahh = .8
             # sec.gnabar_na = .8*(self.order+1)
             # sec.alphahVHalf_na = -58.
             # sec.betahVHalf_na = -58.
             # sec.alphahK_na = 5.
-            # sec.betahK_na = 5.
+            #sec.betah_na = 5.
             #sec.alphamVHalf_na = -39.
             #sec.betamVHalf_na = -39.
             #sec.alphamK_na = 5.
@@ -135,7 +135,7 @@ class Segment:
             sec.gkbar_khva = 1.5
             sec.q10_khva = 3.0
 
-            sec.g_leak = 0.0006
+            sec.g_leak = 1e-3
             sec.erev_leak = -20.
 
             sec.ena = 50.  #115 - 65
@@ -145,7 +145,8 @@ class Segment:
 
 
 class Tree:
-    def __init__(self, depth=5, root_point=np.array([3000., 0., 0.]), record=True):
+    def __init__(self, depth=5, root_point=np.array([3000., 0., 0.]), record=True, mtype='long'):
+        self.mtype = mtype
         self.record = record
         self.root = Segment(end=root_point, record=record)
         self.build_deterministic(depth)
@@ -158,7 +159,14 @@ class Tree:
             if len(to_extend) == 0:
                 break
             for s in to_extend:
-                s.add_branch()
+                if self.mtype == 'pop_sync':
+                    s.add_branch(direction=np.array(
+                        [[1000.*np.random.random(), 0., 0.],
+                            [1000.*np.random.random(), 0., 0.]]),
+                        angles=np.array([0., 0., 0.]))
+                else:
+                    s.add_branch( direction=np.array([10000., 0., 0.]),
+                            angles=np.array([0., 0., 0.]))
 
     def segments(self):
         return _gather_recursive(self.root)

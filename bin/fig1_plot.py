@@ -14,6 +14,14 @@ import sys
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
+def calc_mua(x,dt=0.0025,f_hp=2000.,f_lp=500.):
+    b, a = signal.butter(3, 2 * f_hp * dt / 1000., btype='highpass')
+    ret = signal.lfilter(b, a, x, axis=1)
+    ret[ret<0.] = 0.
+    b, a = signal.butter(3, 2 * f_lp * dt / 1000., btype='lowpass')
+    ret = 20*signal.lfilter(b, a, ret, axis=1)
+    return ret
+
 
 def run_fig1(pot, n_rows, n_cols, **params):
     fig = plt.figure()
@@ -32,8 +40,11 @@ def run_fig1(pot, n_rows, n_cols, **params):
     ax2 = [None, None]
     ax3 = [None, None]
     for freq_n in range(2):
-        b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
-        fted = signal.lfilter(b, a, pot['pot'], axis=1)
+        if freq_n == 0:
+            b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
+            fted = signal.lfilter(b, a, pot['pot'], axis=1)
+        else:
+            fted = calc_mua(pot['pot'])
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
 
         node_locs = []

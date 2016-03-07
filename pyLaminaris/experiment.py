@@ -40,16 +40,16 @@ class Experiment:
             imem = []
             iloc = []
             for p in self.populations:
-                imem_n, iloc_n = p.nodes_imem_loc()
-                imem.append(imem_n)
-                iloc.append(iloc_n)
+                for n in p.neurons:
+                    imem_n, iloc_n = n.nodes_imem_loc()
+                    imem.append(imem_n)
+                    iloc.append(iloc_n)
 
             for n in self.neurons:
                 imem_n, iloc_n = n.nodes_imem_loc()
                 imem.append(imem_n)
                 iloc.append(iloc_n)
 
-            imem, iloc = np.vstack(imem), np.vstack(iloc)
             for e in self.electrodes:
                 e.calc_fields(iloc, imem)
 
