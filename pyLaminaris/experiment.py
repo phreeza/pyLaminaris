@@ -52,6 +52,7 @@ class Experiment:
 
             for e in self.electrodes:
                 e.calc_fields(iloc, imem)
+                e.calc_csd(iloc, imem)
 
         if mode == 'step':
             from time import time

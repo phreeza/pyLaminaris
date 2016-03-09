@@ -114,7 +114,7 @@ class Segment:
             sec.insert('khva')
             sec.insert('extracellular')
             if n == 0:
-                sec.gnabar_nahh = .8#2.4
+                sec.gnabar_nahh = 2.4
             else:
                 sec.gnabar_nahh = .8
             # sec.gnabar_na = .8*(self.order+1)
@@ -159,11 +159,20 @@ class Tree:
             if len(to_extend) == 0:
                 break
             for s in to_extend:
-                if self.mtype == 'pop_sync':
+                if self.mtype == 'pop_sync' and depth == 1:
                     s.add_branch(direction=np.array(
-                        [[1000.*np.random.random(), 0., 0.],
-                            [1000.*np.random.random(), 0., 0.]]),
+                        [[800.*np.random.random()+200, 0., 0.],
+                            [800.*np.random.random()+200, 0., 0.]]),
                         angles=np.array([0., 0., 0.]))
+                elif self.mtype == 'pop_sync' and depth > 1:
+                    if s.order == depth-1:
+                        s.add_branch( direction=np.array([10000., 0., 0.]),
+                                angles=np.array([0., 0., 0.]))
+                    else:
+                        s.add_branch(direction=np.array(
+                            [[100+100.*np.random.random(), 0., 0.],
+                             [100+100.*np.random.random(), 0., 0.]]),
+                            angles=np.array([0., 0., 0.]))
                 else:
                     s.add_branch( direction=np.array([10000., 0., 0.]),
                             angles=np.array([0., 0., 0.]))

@@ -14,12 +14,19 @@ class Electrode:
     def calc_fields(self,
                     node_locs, node_imem,
                     conductivity=1. / (330. * 1e4)):  #conductivity in ohm*um
-        imem, iloc = np.vstack(imem), np.vstack(iloc)
+        node_imem, node_locs = np.vstack(node_imem), np.vstack(node_locs)
         if self.dist_coeffs is None:
             self.build_dist_coeffs(node_locs)
 
         ret = np.dot(node_imem.T, self.dist_coeffs) / conductivity
         self.recorded_potential = ret[:,0]
+
+    def calc_csd(self,
+                    node_locs, node_imem,
+                    csd_range=50.):
+        node_imem, node_locs = np.vstack(node_imem), np.vstack(node_locs)
+        self.csd = np.sum(node_imem[np.abs(self.location-node_locs)[:,0]<csd_range,:],axis=0)/(csd_range*2.)
+
 
     def build_dist_coeffs(self, node_locs):
         self.dist_coeffs = np.zeros(node_locs.shape)
@@ -33,7 +40,7 @@ class Electrode:
 
 class SingleUnitElectrode:
     """ Magical Electrode that records potentials from every unit separately. Useful for
-    sped up simulations in which only a single spike is simulated."""
+    sped up simulations in which only a single spike per fiber is simulated."""
     def __init__(self, location, node_locs=None):
         self.location = location
         self.recorded_potential = np.array([])
@@ -51,6 +58,13 @@ class SingleUnitElectrode:
         for imem,dcoef in zip(node_imem,self.dist_coeffs):
             ret = np.dot(imem.T, dcoef) / conductivity
             self.recorded_potential.append(ret[:,0])
+
+    def calc_csd(self,
+                    node_locs, node_imem,
+                    csd_range=25.):
+        self.csd = []
+        for imem,iloc in zip(node_imem,node_locs):
+            self.csd.append(np.sum(imem[np.abs(self.location-iloc)[:,0]<csd_range,:],axis=0)/(csd_range*2.))
 
     def build_dist_coeffs(self, node_locs):
         self.dist_coeffs = []

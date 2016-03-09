@@ -4,9 +4,10 @@ from scalebars import add_scalebar
 
 pots = np.load('/Users/tom/Downloads/pots.npz')['pots']
 pots2 = np.load('/Users/tom/Downloads/pots_2.npz')['pots']
-pots3 = np.load('/Users/tom/Downloads/pots_3.npz')['pots'].sum(axis=1)
+#pots3 = np.load('/Users/tom/Downloads/pots_3.npz')['pots'].sum(axis=1)
+pots3 = np.load('/Users/tom/Downloads/pots_3_sum.npz')['pots']
 scale = 300.
-scale2 = scale*100
+scale2 = scale*4
 window = np.exp(-(np.arange(1000)-500.)**2/2.**2)
 window /= window.sum()
 window = window*5
@@ -17,32 +18,32 @@ window2 = window2*5
 
 ax1 = plt.subplot(182)
 for n in range(90,110,2):
-    plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots[n,:],mode='same').T/scale-(n-90)*200.+2000,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots[100,:],mode='same').T/scale,color='black',lw=2)
-plt.xlim(0.6,1.2)
+    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[n,:],mode='same').T/scale-(n-90)*200.+2000,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[100,:],mode='same').T/scale,color='black',lw=2)
+plt.xlim(1.7,2.2)
 plt.axis('off')
 add_scalebar(ax1,sizex=.2,sizey=scale,matchx=False,matchy=False,labelx='0.2 ms',
         labely='1 $\mu$V',loc=1,borderpad=0.0,bbox_to_anchor=(100.,100.))
 
 plt.subplot(186,sharey=ax1)
 for n in range(190,210,2):
-    plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots[n,:],mode='same').T/scale-(n-190)*200.+2000,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots[200,:],mode='same').T/scale,color='black',lw=2)
-plt.xlim(1.6,2.2)
+    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[n,:],mode='same').T/scale-(n-190)*200.+2000,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[200,:],mode='same').T/scale,color='black',lw=2)
+plt.xlim(2.6,3.2)
 plt.axis('off')
 
 plt.subplot(184,sharey=ax1)
 for n in range(90,110,2):
-    plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots2[n,:],mode='same').T/scale-(n-90)*200.+2000,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025-10.,np.convolve(window,pots2[100,:],mode='same').T/scale,color='black',lw=2)
-plt.xlim(0.6,1.2)
+    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[n,:],mode='same').T/scale-(n-90)*200.+2000,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[100,:],mode='same').T/scale,color='black',lw=2)
+plt.xlim(1.7,2.2)
 plt.axis('off')
 
 plt.subplot(188,sharey=ax1)
 for n in range(90,110,2):
     plt.plot(np.arange(pots3.shape[1])*0.0025,np.convolve(window2,pots3[n,:],mode='same').T/scale2-(n-90)*200.+2000,color='black')
 plt.plot(np.arange(pots3.shape[1])*0.0025,np.convolve(window2,pots3[100,:],mode='same').T/scale2,color='black',lw=2)
-plt.xlim(1.6,2.2)
+plt.xlim(1.4,1.9)
 plt.axis('off')
 
 order = [2,0,1,3]
@@ -104,3 +105,4 @@ plt.figtext(0.54, 0.84, 'C', fontsize=24)
 plt.figtext(0.74, 0.84, 'D', fontsize=24)
 plt.savefig('figs/simple_axon_comparison_unfiltered.pdf')
 plt.savefig('figs/simple_axon_comparison_unfiltered.png')
+plt.show()
