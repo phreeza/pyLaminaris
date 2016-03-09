@@ -35,6 +35,6 @@ class SimpleNeuron(NMNeuron):
         elif mtype == 'long':
             self.axon = axons.Tree(depth=0,root_point=np.array([20000.,0.,0.]), record=self.record, **params)
         elif mtype == 'pop_sync':
-            self.axon = axons.Tree(depth=2,root_point=np.array([9900.,0.,0.]), record=self.record,mtype=mtype, **params)
+            self.axon = axons.Tree(depth=3,root_point=np.array([9900.,0.,0.]), record=self.record,mtype=mtype, **params)
         self.spiketimes = []
         self.stims = []
