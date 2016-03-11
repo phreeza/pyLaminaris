@@ -166,12 +166,39 @@ class Tree:
                         angles=np.array([0., 0., 0.]))
                 elif self.mtype == 'pop_sync' and depth > 1:
                     if s.order == depth-1:
-                        s.add_branch( direction=np.array([10000., 0., 0.]),
+                        s.add_branch( direction=np.array([
+                            [1000.+200.*np.random.randn(), 0., 0.],
+                            [1000.+200.*np.random.randn(), 0., 0.]]
+                            ),
                                 angles=np.array([0., 0., 0.]))
                     else:
                         s.add_branch(direction=np.array(
-                            [[100+100.*np.random.random(), 0., 0.],
-                             [100+100.*np.random.random(), 0., 0.]]),
+                            [[500.+100.*np.random.randn(), 0., 0.],
+                             [500.+100.*np.random.randn(), 0., 0.]]),
+                            angles=np.array([0., 0., 0.]))
+                elif self.mtype == 'bif':
+                    if s.order == depth-1:
+                        s.add_branch( direction=np.array([
+                            [10000., 0., 0.],
+                            [10000., 0., 0.]]
+                            ),
+                                angles=np.array([0., 0., 0.]))
+                    else:
+                        s.add_branch(direction=np.array(
+                            [[100., 0., 0.],
+                             [100., 0., 0.]]),
+                            angles=np.array([0., 0., 0.]))
+                elif self.mtype == 'bif_term':
+                    if s.order == depth-1:
+                        s.add_branch( direction=np.array([
+                            [700., 0., 0.],
+                            [700., 0., 0.]]
+                            ),
+                                angles=np.array([0., 0., 0.]))
+                    else:
+                        s.add_branch(direction=np.array(
+                            [[100., 0., 0.],
+                             [100., 0., 0.]]),
                             angles=np.array([0., 0., 0.]))
                 else:
                     s.add_branch( direction=np.array([10000., 0., 0.]),

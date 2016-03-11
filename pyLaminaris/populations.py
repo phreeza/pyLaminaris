@@ -74,7 +74,7 @@ class NMNeuronPopulation:
 class SimpleNeuronPopulation(NMNeuronPopulation):
     def __init__(self, size=1, record=True, mtype='long', **params):
         self.size = size
-        assert mtype in ['long','bif','pop_sync']
+        assert mtype in ['long','bif','bif_term','pop_sync']
         self.mtype = mtype
         self.record   = record
         self.neurons  = [

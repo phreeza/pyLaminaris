@@ -9,7 +9,7 @@ def pulse(t):
 ret = np.zeros((pots.shape[0],int(20./0.0025)))
 for rep in range(3000):
     print rep
-    for n_neuron in range(100):
+    for n_neuron in range(pots.shape[1]):
         for t in helper.inhom_poisson(pulse,20.,0.,6.):
             t_ind = int(t/0.0025)
             l = min(600,ret.shape[1]-t_ind)
