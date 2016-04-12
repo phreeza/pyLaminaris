@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import numpy as np
 import pyLaminaris
-pop = pyLaminaris.populations.SimpleNeuronPopulation(mtype='pop_sync',size=300)
+pop = pyLaminaris.populations.SimpleNeuronPopulation(mtype='pop_sync',size=20)
 pop.set_stimulation()
 expt = pyLaminaris.experiment.Experiment()
 expt.add_population(pop)

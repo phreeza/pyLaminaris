@@ -13,9 +13,9 @@ def draw_snip(x0,x1,y,slant):
     plt.plot([x0,x1],[y,y+slant],color='black',lw=1)
     plt.plot([x0,x1],[y+2*snip_spacing,y+2*snip_spacing+slant],color='black',lw=1)
 
-pots  = np.load('pots.npz')['pots']
+pots =  np.load('pots.npz')['pots']
 pots2 = np.load('pots_2.npz')['pots']
-#pots3 = np.load(/pots_3.npz')['pots'].sum(axis=1)
+#pots3 = np.load('pots_3.npz')['pots'].sum(axis=1)
 pots3 = np.load('pots_bifterm.npz')['pots']
 pots4 = np.load('pots_3_sum.npz')['pots']
 scale = 300.
@@ -31,12 +31,13 @@ window2 = window2*5
 
 ax1 = plt.subplot(282)
 for n in range(80,120,4):
-    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[n,:],mode='same').T/scale-(n-100)*100.,color='black')
+    plt.plot(np.arange(pots.shape[1])*0.0025,pots[n,:],mode='same').T/scale-(n-100)*100.,color='black')
 plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[100,:],mode='same').T/scale,color='black',lw=lw)
 plt.xlim(1.4,1.9)
 plt.axis('off')
+
 add_scalebar(ax1,sizex=.2,sizey=2*scale,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='2 $\mu$V',loc=1,bbox_to_anchor=(100.,40.))
+        labely='2 $\mu$V',loc=8,bbox_to_anchor=(120.5,170.5))
 
 plt.subplot(284,sharey=ax1)
 for n in range(180,220,4):
@@ -45,12 +46,15 @@ plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[200,:],mode='sa
 plt.xlim(2.0,2.5)
 plt.axis('off')
 
-plt.subplot(286,sharey=ax1)
+ax2 = plt.subplot(286,sharey=ax1)
 for n in range(80,120,4):
     plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[n,:],mode='same').T/scale3-(n-100)*100.,color='black')
 plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[100,:],mode='same').T/scale3,color='black',lw=lw)
 plt.xlim(1.4,1.9)
 plt.axis('off')
+
+add_scalebar(ax2,sizex=.2,sizey=0.1*scale3,matchx=False,matchy=False,labelx='0.2 ms',
+        labely='0.1 $\mu$V',loc=8,bbox_to_anchor=(250.5,170.5))
 
 plt.subplot(288,sharey=ax1)
 for n in range(80,120,4):
@@ -148,7 +152,7 @@ for k in range(3):
     for n in range(1,4):
         for m in range(2**n):
             if m%2 == 0:
-                p[n][m+1][1] = p[n][m][1] = p[n-1][0][1] - y_sep[n-1] + 100*np.random.randn()
+                p[n][m+1][1] = p[n][m][1] = p[n-1][0][1] - y_sep[n-1] + 200*np.random.randn()
                 p[n][m][0] = p[n-1][m/2][0] + x_sep[n-1]
                 plt.plot([p[n-1][m/2][0],p[n-1][m/2][0]],[p[n][m][1],p[n-1][m/2][1]],color=c[k],lw=lw)
             else:
@@ -163,19 +167,24 @@ draw_snip(-10,10,1820,15)
 plt.xlim(-45,45)
 plt.axis('off')
 
-plt.subplot(257,sharey=ax1)
+plt.subplot(258,sharey=ax1)
 csd = -np.diff(np.diff(pots4,axis=0),axis=0)
 m = np.max(np.abs(csd))
 plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(0,5,-12000,10000))
 plt.xlim(1.4,1.9)
 plt.axis('off')
 
-plt.subplot(258,sharey=ax1)
-for n in range(80,120,4):
-    plt.plot(np.arange(pots4.shape[1])*0.0025,np.convolve(window,pots4[n,:],mode='same').T/(scale2*300)-(n-100)*100.,color='black')
+ax3 = plt.subplot(257,sharey=ax1)
+ax3.eventplot(np.array([[1.5,1.5,1.5]]).T, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
+              linelengths=[150,150,150])
+for n in range(88,120,4):
+    plt.plot(np.arange(pots4.shape[1])*0.0025,np.convolve(window,pots4[n,:],mode='same').T/(scale2*6)-(n-100)*100.,color='black')
 plt.xlim(1.4,1.9)
 plt.ylim(-2000,2100)
 plt.axis('off')
+
+add_scalebar(ax3,sizex=.2,sizey=2/(scale2*6)*1e6,matchx=False,matchy=False,labelx='0.2 ms',
+        labely='2 $\mu$V',loc=8,bbox_to_anchor=(120.5,20.0))
 
 from pyLaminaris import helper
 pots = np.load('pots_3.npz')['pots']
@@ -183,10 +192,11 @@ pots = np.load('pots_3.npz')['pots']
 pots -= pots.mean(axis=2,keepdims=True)
 def pulse(t):
     return (0.1
-            + 0.9 * np.exp(-1.* (t - 10.) ** 2))
+            + 0.9 * np.exp(-((t - 10.)/2.) ** 2))
 ret = np.zeros((pots.shape[0],int(20./0.0025)))
 for n in range(pots.shape[0]):
-    ret[n,:] = np.convolve(pots[n,:,500:500+600].sum(axis=1),pulse(np.arange(ret.shape[1])*0.0025),mode='same')
+    ret[n,:] = 5*np.convolve(pots[n,:,500:500+600].sum(axis=1),pulse(np.arange(ret.shape[1])*0.0025),mode='same')
+
 #n_reps = 1000
 #for rep in range(n_reps):
 #    if rep%100 == 0:
@@ -198,17 +208,25 @@ for n in range(pots.shape[0]):
 #            if l>0: ret[:,t_ind:t_ind+l] += pots[:,n_neuron,500:500+l]/n_reps
 print pots.shape
 
-plt.subplot(2,5,10,sharey=ax1)
-for n in range(80,120,4):
+ax4 = plt.subplot(2,5,9,sharey=ax1)
+for n in range(88,120,4):
     plt.plot(np.arange(ret.shape[1])*0.0025-10.,ret[n,:]/(scale*100)-(n-100)*100.,color='black')
-plt.xlim(-2.4,3.6)
+plt.xlim(-10,10)
 plt.axis('off')
 
-plt.subplot(259,sharey=ax1)
+times = [helper.inhom_poisson(pulse,20.,0.,6.)-10. for n in range(3)]
+ax4.eventplot(times, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
+              linelengths=[150,150,150])
+
+add_scalebar(ax4,sizex=10,sizey=2/(scale2*6)*1e6,matchx=False,matchy=False,labelx='10 ms',
+        labely='2 $\mu$V',loc=8,bbox_to_anchor=(220.5,20.0))
+
+plt.subplot(2,5,10,sharey=ax1)
 csd = -np.diff(np.diff(ret,axis=0),axis=0)
 m = np.max(np.abs(csd[80:,3000:]))
 plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(-10,10,-12000,10000))
-plt.xlim(-2.4,3.6)
+#plt.xlim(-2.4,3.6)
+plt.xlim(-10,10)
 plt.axis('off')
 
 plt.ylim(-2000,2100)

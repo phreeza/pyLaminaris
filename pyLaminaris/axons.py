@@ -173,8 +173,8 @@ class Tree:
                                 angles=np.array([0., 0., 0.]))
                     else:
                         s.add_branch(direction=np.array(
-                            [[500.+100.*np.random.randn(), 0., 0.],
-                             [500.+100.*np.random.randn(), 0., 0.]]),
+                            [[500.+200.*np.random.randn(), 0., 0.],
+                             [500.+200.*np.random.randn(), 0., 0.]]),
                             angles=np.array([0., 0., 0.]))
                 elif self.mtype == 'bif':
                     if s.order == depth-1:

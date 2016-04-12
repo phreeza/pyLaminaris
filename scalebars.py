@@ -4,6 +4,7 @@
 # LICENSE: Python Software Foundation (http://docs.python.org/license.html)
 
 from matplotlib.offsetbox import AnchoredOffsetbox
+from matplotlib.font_manager import FontProperties
 class AnchoredScaleBar(AnchoredOffsetbox):
     def __init__(self, transform, sizex=0, sizey=0, labelx=None, labely=None, loc=4,
                  pad=0.1, borderpad=0.1, sep=2, prop=None, **kwargs):
@@ -28,11 +29,11 @@ class AnchoredScaleBar(AnchoredOffsetbox):
             bars.add_artist(Rectangle((0,0), 0, sizey, fc="none"))
 
         if sizex and labelx:
-            bars = VPacker(children=[bars, TextArea(labelx, minimumdescent=False)],
-                           align="center", pad=0, sep=sep)
+            bars = VPacker(children=[bars, TextArea(labelx, minimumdescent=False,textprops={"size":8})],
+                           align="left", pad=0, sep=sep)
         if sizey and labely:
-            bars = HPacker(children=[TextArea(labely), bars],
-                            align="center", pad=0, sep=sep)
+            bars = HPacker(children=[TextArea(labely, minimumdescent=False, textprops={"size":8,"rotation":90}), bars],
+                            align="top", pad=0, sep=0)
 
         AnchoredOffsetbox.__init__(self, loc, pad=pad, borderpad=borderpad,
                                    child=bars, prop=prop, frameon=False, **kwargs)
