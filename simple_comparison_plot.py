@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import numpy as np
 from matplotlib import pyplot as plt
 from scalebars import add_scalebar
@@ -18,9 +18,10 @@ pots2 = np.load('pots_2.npz')['pots']
 #pots3 = np.load('pots_3.npz')['pots'].sum(axis=1)
 pots3 = np.load('pots_bifterm.npz')['pots']
 pots4 = np.load('pots_3_sum.npz')['pots']
-scale = 300.
-scale3 = scale*8
+scale = 50.
 scale2 = scale*8
+scale3 = scale*300
+scale4 = scale3*10
 window = np.exp(-(np.arange(1000)-500.)**2/2.**2)
 window /= window.sum()
 window = window*5
@@ -29,38 +30,43 @@ window2 = np.exp(-(np.arange(1000)-500.)**2/2.**2)
 window2 /= window2.sum()
 window2 = window2*5
 
-ax1 = plt.subplot(282)
+axes_w = 0.1
+axes_h = 0.52
+axes_ws = 0.08
+axes_hs = 0.46
+
+ax1 = plt.axes([2*axes_w,axes_h,axes_ws,axes_hs]) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(80,120,4):
-    plt.plot(np.arange(pots.shape[1])*0.0025,pots[n,:],mode='same').T/scale-(n-100)*100.,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[100,:],mode='same').T/scale,color='black',lw=lw)
+    plt.plot(np.arange(pots.shape[1])*0.0025,pots[n,:].T/scale-(n-100)*100.,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,pots[100,:].T/scale,color='black',lw=lw)
 plt.xlim(1.4,1.9)
 plt.axis('off')
 
-add_scalebar(ax1,sizex=.2,sizey=2*scale,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='2 $\mu$V',loc=8,bbox_to_anchor=(120.5,170.5))
+add_scalebar(ax1,sizex=.2,sizey=0.02e6/scale,matchx=False,matchy=False,labelx='0.2 ms',
+        labely='20 $\mu$V',loc=8,bbox_to_anchor=(120.5,170.5))
 
-plt.subplot(284,sharey=ax1)
+plt.axes([4*axes_w,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(180,220,4):
-    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[n,:],mode='same').T/scale-(n-200)*100.,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots[200,:],mode='same').T/scale,color='black',lw=lw)
+    plt.plot(np.arange(pots.shape[1])*0.0025,pots[n,:].T/scale-(n-200)*100.,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,pots[200,:].T/scale,color='black',lw=lw)
 plt.xlim(2.0,2.5)
 plt.axis('off')
 
-ax2 = plt.subplot(286,sharey=ax1)
+ax2 = plt.axes([6*axes_w,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(80,120,4):
-    plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[n,:],mode='same').T/scale3-(n-100)*100.,color='black')
-plt.plot(np.arange(pots.shape[1])*0.0025,np.convolve(window,pots2[100,:],mode='same').T/scale3,color='black',lw=lw)
+    plt.plot(np.arange(pots.shape[1])*0.0025,pots2[n,:].T/scale2-(n-100)*100.,color='black')
+plt.plot(np.arange(pots.shape[1])*0.0025,pots2[100,:].T/scale2,color='black',lw=lw)
 plt.xlim(1.4,1.9)
 plt.axis('off')
 
-add_scalebar(ax2,sizex=.2,sizey=0.1*scale3,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='0.1 $\mu$V',loc=8,bbox_to_anchor=(250.5,170.5))
+add_scalebar(ax2,sizex=.2,sizey=0.2e6/scale2,matchx=False,matchy=False,labelx='0.2 ms',
+        labely='0.2 mV',loc=8,bbox_to_anchor=(250.5,170.5))
 
-plt.subplot(288,sharey=ax1)
+plt.axes([8*axes_w,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(80,120,4):
-    plt.plot(np.arange(pots3.shape[1])*0.0025,np.convolve(window2,pots3[n,:],mode='same').T/scale2-(n-100)*100.,color='black')
-plt.plot(np.arange(pots3.shape[1])*0.0025,np.convolve(window2,pots3[96,:],mode='same').T/scale2+400.,color='black',lw=lw)
-plt.plot(np.arange(pots3.shape[1])*0.0025,np.convolve(window2,pots3[104,:],mode='same').T/scale2-400.,color='black',lw=lw)
+    plt.plot(np.arange(pots3.shape[1])*0.0025,pots3[n,:].T/scale2-(n-100)*100.,color='black')
+plt.plot(np.arange(pots3.shape[1])*0.0025,pots3[96,:].T/scale2+400.,color='black',lw=lw)
+plt.plot(np.arange(pots3.shape[1])*0.0025,pots3[104,:].T/scale2-400.,color='black',lw=lw)
 plt.xlim(1.4,1.9)
 plt.axis('off')
 
@@ -68,7 +74,7 @@ order = [1,0,2,3]
 c = ['r','g','b']
 d_sep = 20
 for n_p in range(4):
-    ax = plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
+    ax = plt.axes([axes_w*(2*order[n_p]+1)+0.017,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
     plt.arrow(-15,1800,0,-800,width=1,head_width=8,facecolor='black',head_length=100)
     if n_p == 0:
         plt.plot([0,0],[2000,0],color='black',lw=lw)
@@ -178,25 +184,30 @@ ax3 = plt.subplot(257,sharey=ax1)
 ax3.eventplot(np.array([[1.5,1.5,1.5]]).T, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
               linelengths=[150,150,150])
 for n in range(88,120,4):
-    plt.plot(np.arange(pots4.shape[1])*0.0025,np.convolve(window,pots4[n,:],mode='same').T/(scale2*6)-(n-100)*100.,color='black')
+    plt.plot(np.arange(pots4.shape[1])*0.0025,pots4[n,:].T/(scale3)-(n-100)*100.,color='black')
 plt.xlim(1.4,1.9)
 plt.ylim(-2000,2100)
 plt.axis('off')
 
-add_scalebar(ax3,sizex=.2,sizey=2/(scale2*6)*1e6,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='2 $\mu$V',loc=8,bbox_to_anchor=(120.5,20.0))
+add_scalebar(ax3,sizex=.2,sizey=2e6/(scale3),matchx=False,matchy=False,labelx='0.2 ms',
+        labely='2 mV',loc=8,bbox_to_anchor=(120.5,20.0))
 
 from pyLaminaris import helper
-pots = np.load('pots_3.npz')['pots']
+import glob
+files = glob.glob('pots_3_[1-9]*')
+pots = np.sum([np.load(f)['pots'] for f in files],axis=0)
+csd_i = np.sum([np.load(f)['csd'] for f in files],axis=0)
+#csd_i = np.load('pots_3.npz')['csd']
 #pots = pots-pots[:,:,100:101]
-pots -= pots.mean(axis=2,keepdims=True)
+pots -= pots[:,:,1000:].mean(axis=2,keepdims=True)
 def pulse(t):
-    return (0.1
-            + 0.9 * np.exp(-((t - 10.)/2.) ** 2))
+    return 2*(0.1
+            + 0.9 * np.exp(-((t - 10.)/1.) ** 2))
 ret = np.zeros((pots.shape[0],int(20./0.0025)))
+ret_csd = np.zeros((pots.shape[0],int(20./0.0025)))
 for n in range(pots.shape[0]):
-    ret[n,:] = 5*np.convolve(pots[n,:,500:500+600].sum(axis=1),pulse(np.arange(ret.shape[1])*0.0025),mode='same')
-
+    ret[n,:] = np.convolve(pots[n,:,500:].sum(axis=0),pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025)*0.0025*1000,mode='valid')
+    ret_csd[n,:] = np.convolve(csd_i[n,:,500:].sum(axis=0),pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025)*0.0025*1000,mode='valid')
 #n_reps = 1000
 #for rep in range(n_reps):
 #    if rep%100 == 0:
@@ -210,7 +221,7 @@ print pots.shape
 
 ax4 = plt.subplot(2,5,9,sharey=ax1)
 for n in range(88,120,4):
-    plt.plot(np.arange(ret.shape[1])*0.0025-10.,ret[n,:]/(scale*100)-(n-100)*100.,color='black')
+    plt.plot(np.arange(ret.shape[1])*0.0025-10.,ret[n,:]/(scale4)-(n-100)*100.,color='black')
 plt.xlim(-10,10)
 plt.axis('off')
 
@@ -218,8 +229,11 @@ times = [helper.inhom_poisson(pulse,20.,0.,6.)-10. for n in range(3)]
 ax4.eventplot(times, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
               linelengths=[150,150,150])
 
-add_scalebar(ax4,sizex=10,sizey=2/(scale2*6)*1e6,matchx=False,matchy=False,labelx='10 ms',
-        labely='2 $\mu$V',loc=8,bbox_to_anchor=(220.5,20.0))
+ttimes = np.arange(ret.shape[1])*0.0025-10.
+plt.plot(ttimes,160.*3./2.*pulse(ttimes+10)+2000.-4*160,color='gray')
+
+add_scalebar(ax4,sizex=10,sizey=2e6/(scale4),matchx=False,matchy=False,labelx='10 ms',
+        labely='2 mV',loc=8,bbox_to_anchor=(220.5,20.0))
 
 plt.subplot(2,5,10,sharey=ax1)
 csd = -np.diff(np.diff(ret,axis=0),axis=0)
@@ -231,14 +245,14 @@ plt.axis('off')
 
 plt.ylim(-2000,2100)
 
-plt.figtext(0.14, 0.9, 'A', fontsize=subfig_fontsize)
-plt.figtext(0.34, 0.9, 'B', fontsize=subfig_fontsize)
-plt.figtext(0.54, 0.9, 'C', fontsize=subfig_fontsize)
-plt.figtext(0.74, 0.9, 'D', fontsize=subfig_fontsize)
+plt.figtext(0.10, 0.95, 'A', fontsize=subfig_fontsize)
+plt.figtext(0.30, 0.95, 'B', fontsize=subfig_fontsize)
+plt.figtext(0.50, 0.95, 'C', fontsize=subfig_fontsize)
+plt.figtext(0.70, 0.95, 'D', fontsize=subfig_fontsize)
 
 plt.figtext(0.14, 0.48, 'E', fontsize=subfig_fontsize)
 plt.figtext(0.30, 0.48, 'F', fontsize=subfig_fontsize)
-plt.figtext(0.45,  0.48, 'G', fontsize=subfig_fontsize)
+plt.figtext(0.45, 0.48, 'G', fontsize=subfig_fontsize)
 plt.figtext(0.61, 0.48, 'H', fontsize=subfig_fontsize)
 plt.figtext(0.76, 0.48, 'I', fontsize=subfig_fontsize)
 plt.gcf().set_size_inches(4.48,4.45)

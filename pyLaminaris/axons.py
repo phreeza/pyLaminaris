@@ -148,12 +148,19 @@ class Tree:
     def __init__(self, depth=5, root_point=np.array([3000., 0., 0.]), record=True, mtype='long'):
         self.mtype = mtype
         self.record = record
-        self.root = Segment(end=root_point, record=record)
+        #self.root = Segment(end=root_point, record=record)
+        self.root = Segment(start=[np.random.random()*77., root_point[1], root_point[2]],
+                            end=root_point, record=self.record)
         self.build_deterministic(depth)
         self.virgin = True
         self.delay = [1.]
 
     def build_deterministic(self, depth):
+        def gamma_m_v(m,st):
+            v = float(st)**2
+            t = v/float(m)
+            k = float(m)/t
+            return np.random.gamma(k,t)
         while True:
             to_extend = [s for s in self.leaves() if s.order < depth]
             if len(to_extend) == 0:
@@ -161,20 +168,20 @@ class Tree:
             for s in to_extend:
                 if self.mtype == 'pop_sync' and depth == 1:
                     s.add_branch(direction=np.array(
-                        [[800.*np.random.random()+200, 0., 0.],
-                            [800.*np.random.random()+200, 0., 0.]]),
+                        [[np.random.gamma(20,25), 0., 0.],
+                         [np.random.gamma(20,25), 0., 0.]]),
                         angles=np.array([0., 0., 0.]))
                 elif self.mtype == 'pop_sync' and depth > 1:
                     if s.order == depth-1:
                         s.add_branch( direction=np.array([
-                            [1000.+200.*np.random.randn(), 0., 0.],
-                            [1000.+200.*np.random.randn(), 0., 0.]]
+                            [gamma_m_v(400,10), 0., 0.],
+                            [gamma_m_v(400,10), 0., 0.]]
                             ),
                                 angles=np.array([0., 0., 0.]))
                     else:
                         s.add_branch(direction=np.array(
-                            [[500.+200.*np.random.randn(), 0., 0.],
-                             [500.+200.*np.random.randn(), 0., 0.]]),
+                            [[gamma_m_v(400,300), 0., 0.],
+                             [gamma_m_v(400,300), 0., 0.]]),
                             angles=np.array([0., 0., 0.]))
                 elif self.mtype == 'bif':
                     if s.order == depth-1:
@@ -293,7 +300,7 @@ class ProbTree(Tree):
             if type(kwargs['root_point']) is float or type(kwargs['root_point']) is int:
                 self.root = Segment(end=np.array([kwargs['root_point'], 0, 0]), record=self.record)
             else:
-                self.root = Segment(start=[0, kwargs['root_point'][1], kwargs['root_point'][2]],
+                self.root = Segment(start=[np.random.random()*77., kwargs['root_point'][1], kwargs['root_point'][2]],
                                     end=kwargs['root_point'], record=self.record)
             kwargs.pop('root_point')
         else:

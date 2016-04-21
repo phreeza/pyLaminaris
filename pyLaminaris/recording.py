@@ -23,7 +23,7 @@ class Electrode:
 
     def calc_csd(self,
                     node_locs, node_imem,
-                    csd_range=50.):
+                    csd_range=75.):
         node_imem, node_locs = np.vstack(node_imem), np.vstack(node_locs)
         self.csd = np.sum(node_imem[np.abs(self.location-node_locs)[:,0]<csd_range,:],axis=0)/(csd_range*2.)
 
@@ -61,10 +61,12 @@ class SingleUnitElectrode:
 
     def calc_csd(self,
                     node_locs, node_imem,
-                    csd_range=25.):
+                    csd_range=50.):
         self.csd = []
+        self.n_nodes = []
         for imem,iloc in zip(node_imem,node_locs):
             self.csd.append(np.sum(imem[np.abs(self.location-iloc)[:,0]<csd_range,:],axis=0)/(csd_range*2.))
+            self.n_nodes.append(np.sum(np.abs(self.location-iloc)[:,0]<csd_range,axis=0))
 
     def build_dist_coeffs(self, node_locs):
         self.dist_coeffs = []
