@@ -1,4 +1,9 @@
 import matplotlib
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 #matplotlib.use('Agg')
 import numpy as np
 from matplotlib import pyplot as plt
@@ -21,7 +26,7 @@ pots4 = np.load('pots_3_sum.npz')['pots']
 scale = 50.
 scale2 = scale*8
 scale3 = scale*300
-scale4 = scale3*10
+scale4 = scale*10
 window = np.exp(-(np.arange(1000)-500.)**2/2.**2)
 window /= window.sum()
 window = window*5
@@ -43,7 +48,7 @@ plt.xlim(1.4,1.9)
 plt.axis('off')
 
 add_scalebar(ax1,sizex=.2,sizey=0.02e6/scale,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='20 $\mu$V',loc=8,bbox_to_anchor=(120.5,170.5))
+        labely='20 $\mu$V',loc=8,bbox_to_anchor=(170.5,170.5))
 
 plt.axes([4*axes_w,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(180,220,4):
@@ -60,7 +65,7 @@ plt.xlim(1.4,1.9)
 plt.axis('off')
 
 add_scalebar(ax2,sizex=.2,sizey=0.2e6/scale2,matchx=False,matchy=False,labelx='0.2 ms',
-        labely='0.2 mV',loc=8,bbox_to_anchor=(250.5,170.5))
+        labely='0.2 mV',loc=8,bbox_to_anchor=(290.5,170.5))
 
 plt.axes([8*axes_w,axes_h,axes_ws,axes_hs],sharey=ax1) #plt.subplot(2,8,2*order[n_p]+1,sharey=ax1)
 for n in range(80,120,4):
@@ -195,34 +200,40 @@ add_scalebar(ax3,sizex=.2,sizey=2e6/(scale3),matchx=False,matchy=False,labelx='0
 from pyLaminaris import helper
 import glob
 files = glob.glob('pots_3_[1-9]*')
-pots = np.sum([np.load(f)['pots'] for f in files],axis=0)
+pots = np.concatenate([np.load(f)['pots'] for f in files[:9]],axis=1)
+pots_sum = np.zeros((pots.shape[0],pots.shape[2]))
+for f in files: pots_sum += np.load(f)['pots'].sum(axis=1)
 csd_i = np.sum([np.load(f)['csd'] for f in files],axis=0)
 #csd_i = np.load('pots_3.npz')['csd']
 #pots = pots-pots[:,:,100:101]
 pots -= pots[:,:,1000:].mean(axis=2,keepdims=True)
+pots_sum -= pots_sum[:,1000:].mean(axis=1,keepdims=True)
 def pulse(t):
     return 2*(0.1
             + 0.9 * np.exp(-((t - 10.)/1.) ** 2))
 ret = np.zeros((pots.shape[0],int(20./0.0025)))
+ret2 = np.zeros((pots.shape[0],int(20./0.0025)))
+ret3 = np.zeros((pots.shape[0],int(20./0.0025)))
 ret_csd = np.zeros((pots.shape[0],int(20./0.0025)))
 for n in range(pots.shape[0]):
-    ret[n,:] = np.convolve(pots[n,:,500:].sum(axis=0),pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025)*0.0025*1000,mode='valid')
-    ret_csd[n,:] = np.convolve(csd_i[n,:,500:].sum(axis=0),pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025)*0.0025*1000,mode='valid')
-#n_reps = 1000
-#for rep in range(n_reps):
-#    if rep%100 == 0:
-#        print rep
-#    for n_neuron in range(pots.shape[1]):
-#        for t in helper.inhom_poisson(pulse,20.,0.,6.):
-#            t_ind = int(t/0.0025)
-#            l = min(600,ret.shape[1]-t_ind)
-#            if l>0: ret[:,t_ind:t_ind+l] += pots[:,n_neuron,500:500+l]/n_reps
+    ret[n,:] = np.convolve(pots[n,:,500:].sum(axis=0),pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025-4)*0.0025,mode='valid')
+    ret3[n,:] = np.convolve(pots_sum[n,500:],pulse(np.arange(ret.shape[1]+pots.shape[2]-500-1)*0.0025-4)*0.0025,mode='valid')
+n_reps = 40
+for rep in range(n_reps):
+    if rep%10 == 0:
+        print rep
+    for n_neuron in range(pots.shape[1]):
+        for t in helper.inhom_poisson(pulse,20.,0.,6.):
+            t_ind = int((t)/0.0025)
+            l = min(1000,ret.shape[1]-t_ind)
+            if l>0: ret2[:,t_ind:t_ind+l] += pots[:,n_neuron,500:500+l]/n_reps
 print pots.shape
 
 ax4 = plt.subplot(2,5,9,sharey=ax1)
 for n in range(88,120,4):
+    plt.plot(np.arange(ret.shape[1])*0.0025-10.,ret2[n,:]/(scale4)-(n-100)*100.,color='gray')
     plt.plot(np.arange(ret.shape[1])*0.0025-10.,ret[n,:]/(scale4)-(n-100)*100.,color='black')
-plt.xlim(-10,10)
+plt.xlim(-5,5)
 plt.axis('off')
 
 times = [helper.inhom_poisson(pulse,20.,0.,6.)-10. for n in range(3)]
@@ -232,15 +243,15 @@ ax4.eventplot(times, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
 ttimes = np.arange(ret.shape[1])*0.0025-10.
 plt.plot(ttimes,160.*3./2.*pulse(ttimes+10)+2000.-4*160,color='gray')
 
-add_scalebar(ax4,sizex=10,sizey=2e6/(scale4),matchx=False,matchy=False,labelx='10 ms',
-        labely='2 mV',loc=8,bbox_to_anchor=(220.5,20.0))
+add_scalebar(ax4,sizex=5,sizey=4e5/(scale4),matchx=False,matchy=False,labelx='5 ms',
+        labely='0.4 mV',loc=8,bbox_to_anchor=(220.5,20.0))
 
 plt.subplot(2,5,10,sharey=ax1)
-csd = -np.diff(np.diff(ret,axis=0),axis=0)
-m = np.max(np.abs(csd[80:,3000:]))
+csd = -np.diff(np.diff(ret3,axis=0),axis=0)
+m = np.max(np.abs(csd[80:,2000:]))
 plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(-10,10,-12000,10000))
 #plt.xlim(-2.4,3.6)
-plt.xlim(-10,10)
+plt.xlim(-5,5)
 plt.axis('off')
 
 plt.ylim(-2000,2100)
@@ -255,7 +266,8 @@ plt.figtext(0.30, 0.48, 'F', fontsize=subfig_fontsize)
 plt.figtext(0.45, 0.48, 'G', fontsize=subfig_fontsize)
 plt.figtext(0.61, 0.48, 'H', fontsize=subfig_fontsize)
 plt.figtext(0.76, 0.48, 'I', fontsize=subfig_fontsize)
-plt.gcf().set_size_inches(4.48,4.45)
+#plt.gcf().set_size_inches(4.48,4.45)
+plt.gcf().set_size_inches(4.48*4./3.,4.45*1.2)
 plt.savefig('figs/simple_axon_comparison_unfiltered.pdf')
 plt.savefig('figs/simple_axon_comparison_unfiltered.png')
 plt.show()

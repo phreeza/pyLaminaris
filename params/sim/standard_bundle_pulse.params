@@ -1,6 +1,6 @@
 {
     "param_type":"parallel_bundle",
-    "filt_freq":2000.0,
+    "filt_freq":500.0,
     "postfix":"standard",
     "n_jobs":35,
     "population_size":500,
