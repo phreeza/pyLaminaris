@@ -101,12 +101,13 @@ class ParallelBundleExperiment:
     def run(self, mode='batch'):
         self.exp.run(t=self.simulation_time, mode=mode)
         print "gathering", self.rank
-        nodes = self.cw.gather(self.pop.segment_locations(), root=0)
+        nodes = self.cw.gather(self.pop.get_node_locations(), root=0)
+        segments = self.cw.gather(self.pop.get_segment_locations(), root=0)
         pot = [self.cw.gather(e.recorded_potential, root=0) for e in self.electrodes]
         print "gathering complete", self.rank
         if self.rank == 0:
             loc = [e.location for e in self.electrodes]
             pot = np.sum(pot, axis=1)
-            np.savez(self.fname, pot=pot, loc=loc, nodes=nodes)
+            np.savez(self.fname, pot=pot, loc=loc, nodes=nodes, segments=segments)
         MPI.Finalize()
 

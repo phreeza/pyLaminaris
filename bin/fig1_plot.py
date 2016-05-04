@@ -1,6 +1,6 @@
 import matplotlib as mpl
 
-#mpl.use('Agg')
+# mpl.use('Agg')
 import matplotlib.gridspec as gridspec
 import numpy as np
 from matplotlib import pyplot as plt
@@ -14,10 +14,11 @@ import sys
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
-def calc_mua(x,dt=0.0025,f_hp=2000.,f_lp=500.):
+
+def calc_mua(x, dt=0.0025, f_hp=2000., f_lp=500.):
     b, a = signal.butter(3, 2 * f_hp * dt / 1000., btype='highpass')
     ret = signal.lfilter(b, a, x, axis=1)
-    ret[ret<0.] = 0.
+    ret[ret < 0.] = 0.
     b, a = signal.butter(3, 2 * f_lp * dt / 1000., btype='lowpass')
     ret = signal.lfilter(b, a, ret, axis=1)
     return ret
@@ -48,15 +49,39 @@ def run_fig1(pot, n_rows, n_cols, **params):
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
 
         node_locs = []
-        #ngroup =  pot['nodes'][0]
-        for n,ngroup in enumerate(pot['nodes']):
-            for m,segment_group in enumerate(ngroup):
+        # ngroup =  pot['nodes'][0]
+        for n, ngroup in enumerate(pot['nodes']):
+            for m, segment_group in enumerate(ngroup):
                 for segment in segment_group:
                     segment = np.array(segment)
                     node_locs.append(segment)
-                    if n==1 and m==1:
-                        ax1[freq_n].plot(segment[:, 1], segment[:, 0], color='k', alpha=1.0)
+                    # if n==1 and m==1:
+                    # ax1[freq_n].plot(segment[:, 1], segment[:, 0], color='k', alpha=1.0)
 
+        def jittered_line(start, end, sigma=0.5):
+            # generate some naturalistic looking jitter on the axon path
+            def norm(x):
+                return np.sqrt(np.sum(x ** 2))
+
+            line = np.arange(0., norm(end - start), 10.)[np.newaxis, :] * (end - start)[:, np.newaxis] / norm(
+                end - start)
+            jitter = sigma * np.random.randn(*line.shape)
+            jitter[:, 0] = 0.
+            jitter = np.cumsum(jitter, axis=1)
+            jitter = np.cumsum(jitter, axis=1)
+            jitter -= np.linspace(0., 1., jitter.shape[1])[np.newaxis] * jitter[:, -1:]
+
+            return start[:, np.newaxis] + (line + jitter)
+
+        n_neuron = np.random.randint(len(pot['segments'][0]))
+        print "Neuron number:", n_neuron
+        s, e = pot['segments'][0][n_neuron][0]
+        l = jittered_line(s, e, 0.0)
+        ax1[freq_n].plot(l[1], l[0], color='k', alpha=1.0, lw=0.5)
+
+        for s, e in pot['segments'][0][n_neuron][1:]:
+            l = jittered_line(s, e)
+            ax1[freq_n].plot(l[1], l[0], color='k', alpha=1.0, lw=0.5)
         times = np.arange(0., 20., dt)
         locs = []
         for n in range(10):
@@ -78,7 +103,7 @@ def run_fig1(pot, n_rows, n_cols, **params):
         ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
         index = [get_index(36 + n, 2, n_rows, n_cols) for n in range(30)]
         if freq_n == 0:
-            amp_line = np.array([fted[n, ft_abs[n, 3500:].argmax()+3500] for n in index])
+            amp_line = np.array([fted[n, ft_abs[n, 3500:].argmax() + 3500] for n in index])
             amp_line = -amp_line + amp_line.mean()
         else:
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
@@ -148,6 +173,7 @@ def run_fig1(pot, n_rows, n_cols, **params):
 
     return fig
 
+
 def run(params_fname):
     params = json.load(open(params_fname))
 
@@ -160,6 +186,7 @@ def run(params_fname):
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/manuscript_fig1_' + params['postfix'] + fmt)
     plt.close(fig)
+
 
 if __name__ == '__main__':
     run(sys.argv[-1])

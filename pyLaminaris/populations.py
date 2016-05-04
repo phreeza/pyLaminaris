@@ -54,17 +54,26 @@ class NMNeuronPopulation:
             iloc.append(iloc_n)
         imem = np.vstack(imem)
         iloc = np.vstack(iloc)
-        if hasattr(self,'side') and self.side == 'contra':
+        if hasattr(self, 'side') and self.side == 'contra':
             iloc[:, 0] = 2 * (self.x_offset + self.x_spread) - iloc[:, 0]
         return imem, iloc
 
-    def segment_locations(self):
+    def get_node_locations(self):
         ret = []
         for ax in self.neurons:
             ret.append([])
             for seg in ax.axon.segments():
                 ret[-1].append(seg.node_locations)
 
+        return ret
+
+    def get_segment_locations(self):
+        ret = []
+        for ax in self.neurons:
+            ret.append([])
+            for seg in ax.axon.segments():
+                l = np.vstack((seg.start, seg.end))
+                ret[-1].append(l)
         return ret
 
     def draw_2d(self, thin=10):
