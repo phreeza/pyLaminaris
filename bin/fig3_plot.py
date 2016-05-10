@@ -14,7 +14,7 @@ import sys
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
-def run_fig2(pot_bif, pot_nobif, n_rows, n_cols, plot_row_lf = 42, plot_row_hf = 59, plot_col = 100, **kwargs):
+def run_fig3(pot_bif, pot_nobif, n_rows, n_cols, plot_row_lf = 42, plot_row_hf = 59, plot_col = 100, **kwargs):
     dt = 0.0025
     filt_freq = 2000.
 
@@ -116,10 +116,10 @@ def run(params_bif_fname,params_nobif_fname):
     fname = "data/bundle_pulse_" + params_nobif['postfix'] + ".npz"
     potentials_nobif = np.load(fname)
 
-    fig = run_fig2(potentials_bif, potentials_nobif, n_rows, n_cols, 
+    fig = run_fig3(potentials_bif, potentials_nobif, n_rows, n_cols, 
                       **params_bif)
     for fmt in ['.png', '.pdf']:
-        fig.savefig('figs/manuscript_fig2_' + params_bif['postfix'] + '_' + params_nobif['postfix'] + fmt)
+        fig.savefig('figs/manuscript_fig3_' + params_bif['postfix'] + '_' + params_nobif['postfix'] + fmt)
     plt.close(fig)
 
 if __name__ == '__main__':

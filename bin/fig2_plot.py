@@ -24,7 +24,7 @@ def calc_mua(x, dt=0.0025, f_hp=2000., f_lp=500.):
     return ret
 
 
-def run_fig1(pot, n_rows, n_cols, **params):
+def run_fig2(pot, n_rows, n_cols, **params):
     fig = plt.figure()
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
           gridspec.GridSpec(10, 14, top=0.48, bottom=0.1)]
@@ -183,9 +183,9 @@ def run(params_fname):
 
     fname = "data/bundle_pulse_" + params['postfix'] + ".npz"
     potentials = np.load(fname)
-    fig = run_fig1(potentials, n_rows, n_cols, **params)
+    fig = run_fig2(potentials, n_rows, n_cols, **params)
     for fmt in ['.png', '.pdf']:
-        fig.savefig('figs/manuscript_fig1_' + params['postfix'] + fmt)
+        fig.savefig('figs/manuscript_fig2_' + params['postfix'] + fmt)
     plt.close(fig)
 
 
