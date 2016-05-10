@@ -28,24 +28,26 @@ def run_fig1(pot, n_rows, n_cols, **params):
     fig = plt.figure()
     gs = [gridspec.GridSpec(10, 14, top=0.9, bottom=0.52),
           gridspec.GridSpec(10, 14, top=0.48, bottom=0.1)]
-
+    raw_pot = pot['pot']/1e6
     dt = 0.0025
     filt_freq = params['filt_freq']
 
     filter_type = ['lowpass', 'highpass']
 
-    scalemax = .1
-    norm = mpl.colors.Normalize(vmin=0, vmax=1.)
+    scalemax = .075
+    norm = mpl.colors.Normalize(vmin=0, vmax=scalemax)
 
     ax1 = [None, None]
     ax2 = [None, None]
     ax3 = [None, None]
+
+    tree_n = [1, 12]
     for freq_n in range(2):
         if freq_n == 0:
             b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
-            fted = signal.lfilter(b, a, pot['pot'], axis=1)
+            fted = signal.lfilter(b, a, raw_pot, axis=1)
         else:
-            fted = calc_mua(pot['pot'])
+            fted = calc_mua(raw_pot)
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
 
         node_locs = []
@@ -73,10 +75,10 @@ def run_fig1(pot, n_rows, n_cols, **params):
 
             return start[:, np.newaxis] + (line + jitter)
 
-        n_neuron = np.random.randint(len(pot['segments'][0]))
+        n_neuron = tree_n[freq_n] #np.random.randint(len(pot['segments'][0]))
         print "Neuron number:", n_neuron
         s, e = pot['segments'][0][n_neuron][0]
-        l = jittered_line(s, e, 0.0)
+        l = jittered_line(s, e, 0.01)
         ax1[freq_n].plot(l[1], l[0], color='k', alpha=1.0, lw=0.5)
 
         for s, e in pot['segments'][0][n_neuron][1:]:
@@ -93,8 +95,8 @@ def run_fig1(pot, n_rows, n_cols, **params):
                 lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500])[0]
                 ymin, ymax = plt.ylim()
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
-                lh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1e6)))
-                dh.set_color(plt.cm.jet((ymax - ymin) / (scalemax * 1e6)))
+                lh.set_color(plt.cm.jet(norm((ymax - ymin))))
+                dh.set_color(plt.cm.jet(norm((ymax - ymin))))
                 # ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
                 #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
 
@@ -107,12 +109,12 @@ def run_fig1(pot, n_rows, n_cols, **params):
             amp_line = -amp_line + amp_line.mean()
         else:
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
-        amp_line = amp_line / 1e6
+        print amp_line
 
         locs_line = pot['loc'][index, 0]
 
         ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_rows, -1)), pot['loc'][:, 0].reshape((n_rows, -1)),
-                            amps.reshape((n_rows, -1)) / (scalemax * 1e6), (0.7 ** np.arange(7)), cmap=plt.cm.jet,
+                            amps.reshape((n_rows, -1)), scalemax*(0.7 ** np.arange(7)), cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -134,12 +136,11 @@ def run_fig1(pot, n_rows, n_cols, **params):
             plt.xlabel(u'bif.-term.\n[1/\u03BCm]')
             plt.xticks(np.arange(-4, 4.1, 2))
         else:
-            plt.bar(bottom=bins[:-1], width=hist / 1., height=bins[1], left=0, orientation='horizontal', color='k',
+            plt.bar(bottom=bins[:-1], width=np.array(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal', color='k',
                     edgecolor='w')
-            plt.xlabel(u'nodes\n[1/\u03BCm]')
+            plt.xlabel('nodes [1/$\mu$m]')
             ax3[freq_n].tick_params(left="off")
-            plt.xticks(np.arange(0, 18, 4))
-            plt.ylim(locs[-1, 0] + 100, locs[0, 0] - 100)
+            plt.xticks(np.arange(0, .31, 0.1))
         ax3_twin = ax3[freq_n].twiny()
         ax3_twin.plot(amp_line, locs_line, lw=2, color='r')
 

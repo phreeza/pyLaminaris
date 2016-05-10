@@ -312,38 +312,6 @@ class ProbTree(Tree):
             self.build_logistic(**kwargs['logistic_params'])
 
         self.virgin = True
-        # # self.delay = 1.5 + 0.25*np.random.randn()
-        # #FIXME: why is this here?
-        # if mode == 'pulse':
-        # class rv(stats.rv_continuous):
-        # def _pdf(self, x):
-        # return (1. + np.sin(6.28 * 3.33 * x)) * np.exp(-(x * x / (2 * .5 * .5))) / 1.253
-        #
-        #     myrv = rv()
-        #     self.delay = [0.]
-        #     while self.delay[0] < 0.2:
-        #         self.delay[0] = myrv.rvs(1.5)
-        # elif mode == 'spont':
-        #     import helper
-        #
-        #     self.delay = helper.hom_poisson(0.1, 100, .1)
-        # elif mode == 'click':
-        #     import helper
-        #
-        #     def click(t):
-        #         return 0.1 + 0.9 * np.exp(np.sin(6 * np.pi * t) - 1. - (t - 35) ** 2)
-        #
-        #     self.delay = helper.inhom_poisson(click, 50., 0., 200.)
-        # elif mode == 'mod_click':
-        #     import helper
-        #
-        #     def mod_click(t):
-        #         return (0.1
-        #                 + 2.9 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 10) ** 2)
-        #                 + 1.5 * np.exp(np.sin(4 * 2 * np.pi * t) - 1. - 16 * (t - 11) ** 2)
-        #                 - 0.1 * np.exp(-16 * (t - 10.5) ** 2))
-        #
-        #     self.delay = helper.inhom_poisson(mod_click, 20., 0., 6.)
 
     def build_logistic(self,
                        bif_center=15000., bif_sigma=200., bif_amp=500.,
