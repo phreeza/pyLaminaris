@@ -39,6 +39,10 @@ class NMNeuronPopulation:
             fun = mod_click
         elif stimtype == 'pulse':
             fun = pulse
+        elif stimtype == 'single':
+            for n in self.neurons:
+                n.set_spiketimes([1.])
+            return
         else:
             raise NameError, "Unknown stimulation type"
 

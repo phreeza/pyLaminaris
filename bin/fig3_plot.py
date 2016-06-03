@@ -14,9 +14,10 @@ import sys
 def get_index(row, col, n_rows, n_cols):
     return n_cols * row + col
 
-def run_fig3(pot_bif, pot_nobif, n_rows, n_cols, plot_row_lf = 42, plot_row_hf = 59, plot_col = 100, **kwargs):
+
+def run_fig3(pot_bif, pot_nobif, n_rows, n_cols, plot_col_lf=50, plot_col_hf=50, plot_row=100, **kwargs):
     dt = 0.0025
-    filt_freq = 2000.
+    filt_freq = [500, 2000]
 
     filter_type = ['lowpass', 'highpass']
 
@@ -24,67 +25,129 @@ def run_fig3(pot_bif, pot_nobif, n_rows, n_cols, plot_row_lf = 42, plot_row_hf =
 
     amps = []
     for pot in [pot_bif,pot_nobif]:
-        locs = []
         amps.append([])
         for freq_n in range(2):
-            locs.append([])
+            locs = []
             amps[-1].append([])
-            b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
+            b, a = signal.butter(3, 2 * filt_freq[freq_n] * dt / 1000., btype=filter_type[freq_n])
             fted = signal.lfilter(b, a, pot['pot'], axis=1)
-            fted = fted-fted.mean(axis=1).reshape((-1, 1))
+            # fted = fted-fted.mean(axis=1).reshape((-1, 1))
             ft_abs = np.abs((fted - fted.mean(axis=1).reshape((-1, 1))))
 
             for m in range(n_cols):
                 amps[-1][-1].append([])
-                locs[-1].append([])
+                locs.append([])
                 for n in range(n_rows):
                     index = get_index(n, m, n_rows, n_cols)  # 20 * n + m
-                    locs[-1][-1].append(pot['loc'][index, :])
-                    amps[-1][-1][-1].append(fted[index, 4000:6000])
+                    locs[-1].append(pot['loc'][index, :])
+                    amps[-1][-1][-1].append(fted[index, 3000:6000] - fted[index, 1100:3000].mean())
                     # amps[-1][-1].append(fted[index,3500:-2499].std())
         #return np.array(amps), np.array(locs)
     amps = np.array(amps)
+    #amps[biftype,freq,col,row]
     amps_psd = np.sum(amps**2,axis=4)
     locs = np.array(locs)
-
+    # locs[col,row,dim]
+    print locs.shape
+    print plot_col_lf, n_rows
+    print plot_row, n_cols
+    print 'col', locs[plot_col_lf, 0, :]
+    print 'row', locs[0, plot_row, :]
     def norm(a):
         return a/np.max(np.abs(a).squeeze(),axis=1)[:,np.newaxis]
     def norm_first(x):
-        return x/x[0]
-    
+        return x  # /x[0]
+
+    plt.subplot(335)
+    plt.imshow(np.log(amps_psd[0, 0, :, :] / amps_psd[1, 0, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.title('bif LF/nobif LF')
+    plt.colorbar()
+    plt.subplot(336)
+    plt.imshow(np.log(amps_psd[0, 1, :, :] / amps_psd[1, 0, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.title('bif HF/nobif LF')
+    plt.colorbar()
+    plt.subplot(338)
+    plt.imshow(np.log(amps_psd[0, 0, :, :] / amps_psd[1, 1, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.title('bif LF/nobif HF')
+    plt.colorbar()
+    plt.subplot(339)
+    plt.imshow(np.log(amps_psd[0, 1, :, :] / amps_psd[1, 1, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.title('bif HF/nobif HF')
+    plt.colorbar()
+
+    plt.subplot(332)
+    plt.imshow(np.log(amps_psd[0, 0, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.subplot(333)
+    plt.imshow(np.log(amps_psd[0, 1, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.subplot(334)
+    plt.imshow(np.log(amps_psd[1, 0, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.subplot(337)
+    plt.imshow(np.log(amps_psd[1, 1, :, :]).T, interpolation='nearest', aspect='auto')
+    plt.colorbar()
+    plt.figure()
+    plt.plot(amps[0, 0, 0, 120::10].T)
+    plt.title('bif LF')
+    plt.figure()
+    plt.plot(amps[0, 1, 0, 120::10].T)
+    plt.title('bif HF')
+    plt.figure()
+    plt.plot(amps_psd[0, 1, 0, :], label='bif HF')
+    plt.plot(amps_psd[1, 1, 0, :], label='nobif HF')
+    plt.plot(amps_psd[0, 0, 0, :], label='bif LF')
+    plt.plot(amps_psd[1, 0, 0, :], label='nobif LF')
+    plt.xlabel('distance[20um]')
+    plt.ylabel('PSD[au]')
+    plt.legend()
+    plt.figure()
+    plt.plot(amps_psd[0, 1, 0, :] / amps_psd[1, 1, 0, :], label='bif HF/nobif HF')
+    plt.plot(amps_psd[0, 0, 0, :] / amps_psd[1, 0, 0, :], label='bif LF/nobif LF')
+    plt.xlabel('distance[20um]')
+    plt.ylabel('ratio')
+    plt.legend()
+    plt.show()
     fig = plt.figure()
+
+
+    # axial plots: choose a column and vary rows
     ax1 = plt.subplot(141)
     plot_loc_offset = 0
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,0,0,plot_col:]),label='low-pass',lw=2)
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[0,1,0,plot_col:]),label='high-pass',lw=2)
-
+    plt.plot(locs[0, plot_row:, 0] - locs[3, plot_row - plot_loc_offset, 0], norm_first(amps_psd[0, 0, 0, plot_row:]),
+             label='low-pass', lw=2)
+    plt.plot(locs[0, plot_row:, 0] - locs[3, plot_row - plot_loc_offset, 0], norm_first(amps_psd[0, 1, 0, plot_row:]),
+             label='high-pass', lw=2)
     plt.loglog()
     plt.ylabel('power (normalized)')
     plt.xlabel('axial distance [um]')
     
-    ax2 = plt.subplot(143,sharex=ax1,sharey=ax1)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,0,:,plot_row_lf]),label='low-pass',lw=2)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[0,1,:,plot_row_hf]),label='high-pass',lw=2)
+    ax3 = plt.subplot(142,sharex=ax1,sharey=ax1)
+    plot_loc_offset = 0
+    plt.plot(locs[0, plot_row:, 0] - locs[3, plot_row - plot_loc_offset, 0], norm_first(amps_psd[1, 0, 0, plot_row:]),
+             label='low-pass', lw=2)
+    plt.plot(locs[0, plot_row:, 0] - locs[3, plot_row - plot_loc_offset, 0], norm_first(amps_psd[1, 1, 0, plot_row:]),
+             label='high-pass', lw=2)
+    plt.legend(loc=3,bbox_to_anchor=(-0.95, .02))
+    plt.loglog()
+
+
+    # Radial plots: choose a row and vary columns
+    ax2 = plt.subplot(143, sharex=ax1, sharey=ax1)
+    plt.plot(locs[:, 0, 1], norm_first(amps_psd[0, 0, :, plot_row]), label='low-pass', lw=2)
+    plt.plot(locs[:, 0, 1], norm_first(amps_psd[0, 1, :, plot_row]), label='high-pass', lw=2)
     plt.xlabel('radial distance [um]')
     plt.loglog()
 
-    ax3 = plt.subplot(142,sharex=ax1,sharey=ax1)
-    plot_loc_offset = 0
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,0,0,plot_col:]),label='low-pass',lw=2)
-    plt.plot(locs[0,0,plot_col:,0]-locs[0,0,plot_col-plot_loc_offset,0],norm_first(amps_psd[1,1,0,plot_col:]),label='high-pass',lw=2)
-    plt.legend(loc=3,bbox_to_anchor=(-0.95, .02))
-
-    plt.loglog()
-    #plt.xlabel('axial distance [um]')
     ax4 = plt.subplot(144,sharex=ax1,sharey=ax1)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,0,:,plot_row_lf]),label='low-pass',lw=2)
-    plt.plot(locs[0,:,0,1],norm_first(amps_psd[1,1,:,plot_row_hf]),label='high-pass',lw=2)
+    plt.plot(locs[:, 0, 1], norm_first(amps_psd[1, 0, :, plot_row]), label='low-pass', lw=2)
+    plt.plot(locs[:, 0, 1], norm_first(amps_psd[1, 1, :, plot_row]), label='high-pass', lw=2)
     #plt.xlabel('radial distance [um]')
     plt.loglog()
 
 
-    #plt.xlim((locs[0,0,plot_col,0]-locs[0,0,plot_col-plot_loc_offset,0],locs[0,0,-1,0]-locs[0,0,plot_col-plot_loc_offset,0]))
-    plt.xlim(locs[0,1,0,1],locs[0,-1,0,1])
+    # plt.xlim((locs[0,plot_row,0]-locs[0,plot_row-plot_loc_offset,0],locs[0,-1,0]-locs[0,plot_row-plot_loc_offset,0]))
+    plt.xlim(locs[0, 0, 1], locs[-1, 0,1])
     plt.ylim(1e-4,1.)
     ax1.xaxis.set_label_coords(1.0, -0.05) 
     ax2.xaxis.set_label_coords(1.0, -0.05) 
@@ -120,6 +183,7 @@ def run(params_bif_fname,params_nobif_fname):
                       **params_bif)
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/manuscript_fig3_' + params_bif['postfix'] + '_' + params_nobif['postfix'] + fmt)
+    plt.show()
     plt.close(fig)
 
 if __name__ == '__main__':

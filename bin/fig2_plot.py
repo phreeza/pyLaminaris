@@ -1,4 +1,10 @@
 import matplotlib as mpl
+from matplotlib import rc
+
+rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+## for Palatino and other serif fonts use:
+# rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 
 # mpl.use('Agg')
 import matplotlib.gridspec as gridspec
@@ -41,7 +47,7 @@ def run_fig2(pot, n_rows, n_cols, **params):
     ax2 = [None, None]
     ax3 = [None, None]
 
-    tree_n = [1, 12]
+    tree_n = [1, 1]
     for freq_n in range(2):
         if freq_n == 0:
             b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
@@ -133,7 +139,7 @@ def run_fig2(pot, n_rows, n_cols, **params):
         if freq_n == 0:
             plt.bar(bottom=bins[1:-1], width=np.diff(hist) / 1., height=bins[1], left=0, orientation='horizontal',
                     color='k', edgecolor='w')
-            plt.xlabel(u'bif.-term.\n[1/\u03BCm]')
+            plt.xlabel(u'bif.-term.\n[1/$\mu$m]')
             plt.xticks(np.arange(-4, 4.1, 2))
         else:
             plt.bar(bottom=bins[:-1], width=np.array(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal', color='k',
@@ -186,6 +192,7 @@ def run(params_fname):
     fig = run_fig2(potentials, n_rows, n_cols, **params)
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/manuscript_fig2_' + params['postfix'] + fmt)
+    plt.show()
     plt.close(fig)
 
 

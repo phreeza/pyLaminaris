@@ -50,9 +50,11 @@ class Experiment:
                 imem.append(imem_n)
                 iloc.append(iloc_n)
 
+            print "calc potentials started"
             for e in self.electrodes:
                 e.calc_fields(iloc, imem)
                 e.calc_csd(iloc, imem)
+            print "calc potentials ended"
 
         if mode == 'step':
             from time import time

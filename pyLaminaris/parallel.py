@@ -78,6 +78,7 @@ class ParallelBundleExperiment:
             pop_params = {}
         self.pop = pops.NMNeuronPopulation(size=self.mysize, record=True, **pop_params)
         self.electrodes = []
+        self.unit_electrodes = []
 
         for n in range(self.electrode_params['y_N']):
             if self.electrode_params['y_quadscale']:
@@ -93,6 +94,10 @@ class ParallelBundleExperiment:
                     self.electrode_params['y_base'] + self.electrode_params['y_d'] * nn,
                     self.electrode_params['x_base'] + self.electrode_params['x_d'] * mm,
                     0.])))
+                self.unit_electrodes.append(recording.SingleUnitElectrode(location=np.array([
+                    self.electrode_params['y_base'] + self.electrode_params['y_d'] * nn,
+                    self.electrode_params['x_base'] + self.electrode_params['x_d'] * mm,
+                    0.])))
         self.pop.set_stimulation(stimtype=self.stimtype)
         self.exp.add_population(self.pop)
         for e in self.electrodes:
@@ -104,10 +109,11 @@ class ParallelBundleExperiment:
         nodes = self.cw.gather(self.pop.get_node_locations(), root=0)
         segments = self.cw.gather(self.pop.get_segment_locations(), root=0)
         pot = [self.cw.gather(e.recorded_potential, root=0) for e in self.electrodes]
+        pot_unit = [self.cw.gather(e.recorded_potential, root=0) for e in self.unit_electrodes]
         print "gathering complete", self.rank
         if self.rank == 0:
             loc = [e.location for e in self.electrodes]
             pot = np.sum(pot, axis=1)
-            np.savez(self.fname, pot=pot, loc=loc, nodes=nodes, segments=segments)
+            np.savez(self.fname, pot=pot, loc=loc, nodes=nodes, segments=segments, pot_unit=pot_unit)
         MPI.Finalize()
 

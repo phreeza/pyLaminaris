@@ -48,6 +48,10 @@ class Segment:
 
         self.nodes = [h.Section() for x in range(self.nnode)]
         self.myelin = [h.Section() for x in range(self.nnode)]
+        self.sections = []
+        for n in range(self.nnode):
+            self.sections.append(self.nodes[n])
+            self.sections.append(self.myelin[n])
         # To connect two sections, call the connect() method of the child
         # Section object with the parent section as the argument:
         for n in range(self.nnode):
@@ -60,13 +64,19 @@ class Segment:
 
         self._sections_setup()
 
-        if self.record:
-            self.rec_i_mem = [h.Vector() for i in range(self.nnode)]
-            [self.rec_i_mem[i].record(self.nodes[i](0.5)._ref_i_membrane)
-             for i in range(self.nnode)]
+        self.comps = np.array([comp for n in self.sections for comp in n.allseg()])
+        self.comp_areas = np.array([c.area() for c in self.comps])
+        self.comps = self.comps[self.comp_areas > 0]
+        self.comp_areas = self.comp_areas[self.comp_areas > 0]
+        self.ncomps = len(self.comps)
 
-        self.node_locations = [self.start + (n + 1.) / self.nnode * (self.end - self.start)
-                               for n in range(self.nnode)]
+        if self.record:
+            self.rec_i_mem = [h.Vector() for i in self.comps]
+            [self.rec_i_mem[i].record(comp._ref_i_membrane)
+             for i, comp in enumerate(self.comps)]
+
+        self.node_locations = [self.start + (n + 1.) / self.ncomps * (self.end - self.start)
+                               for n in range(self.ncomps)]
 
     def get_instantaneous_imem(self):
         return np.array([[self.nodes[i](0.5).i_membrane for i in range(self.nnode)]]).T
@@ -252,7 +262,7 @@ class Tree:
             # TODO: here is where we need to differentiate record or not.
             # FIXME: Should be failing a test!!!!
             if s.record:
-                imem.extend(s.rec_i_mem)
+                imem.extend(s.rec_i_mem * s.comp_areas[:, np.newaxis])
             else:
                 imem.extend(s.get_instantaneous_imem())
             loc.extend(s.node_locations)

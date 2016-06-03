@@ -17,10 +17,11 @@ class NMNeuron:
     def set_spiketimes(self, spiketimes):
         self.spiketimes = spiketimes
         for d in self.spiketimes:
-            stim = h.IClamp(self.axon.root.nodes[0](0.5))
-            stim.delay = d
-            stim.amp = 0.5
-            stim.dur = 0.1
+            stim = h.AlphaSynapse(self.axon.root.nodes[0](0.5))
+            stim.onset = d
+            stim.gmax = 5e-2
+            stim.e = 0.
+            stim.tau = 0.01
             self.stims.append(stim)
 
     def nodes_imem_loc(self):
