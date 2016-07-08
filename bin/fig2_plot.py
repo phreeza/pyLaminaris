@@ -1,10 +1,12 @@
 import matplotlib as mpl
 from matplotlib import rc
+import seaborn as sns
+sns.set_style("whitegrid")
 
-rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+#rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
 ## for Palatino and other serif fonts use:
 # rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
+#rc('text', usetex=True)
 
 # mpl.use('Agg')
 import matplotlib.gridspec as gridspec
@@ -40,7 +42,7 @@ def run_fig2(pot, n_rows, n_cols, **params):
 
     filter_type = ['lowpass', 'highpass']
 
-    scalemax = .075
+    scalemax = .75
     norm = mpl.colors.Normalize(vmin=0, vmax=scalemax)
 
     ax1 = [None, None]
@@ -90,6 +92,8 @@ def run_fig2(pot, n_rows, n_cols, **params):
         for s, e in pot['segments'][0][n_neuron][1:]:
             l = jittered_line(s, e)
             ax1[freq_n].plot(l[1], l[0], color='k', alpha=1.0, lw=0.5)
+        if freq_n == 1:
+            ax1[freq_n].plot([0+770,500+770],[16100,16100],lw=4,color='k',solid_capstyle='butt')
         times = np.arange(0., 20., dt)
         locs = []
         for n in range(10):
@@ -98,13 +102,19 @@ def run_fig2(pot, n_rows, n_cols, **params):
                 ax_t.axis('off')
                 index = get_index(36 + 3 * n, 2 * m + 4, n_rows, n_cols)  # 760 + 60 * n + 2 * m + 1
                 locs.append(pot['loc'][index, :])
-                lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500])[0]
+                lh = ax_t.plot(times[3500:-2499], fted[index, 3500:-2500],clip_on=False)[0]
                 ymin, ymax = plt.ylim()
+                if freq_n == 0:
+                    plt.ylim(-scalemax/2,scalemax/2)
+                else:
+                    plt.ylim(0,scalemax)
                 dh = ax1[freq_n].plot(locs[-1][1], locs[-1][0], '.')[0]
                 lh.set_color(plt.cm.jet(norm((ymax - ymin))))
                 dh.set_color(plt.cm.jet(norm((ymax - ymin))))
                 # ax_t.set_ylim(-5e5 / (m + 1), 5e5 / (m + 1))
-                #plt.fill([0,100,100,0],[0,0,100000,100000],'k')
+                # plt.fill([0,100,100,0],[0,0,100000,100000],'k')
+        if freq_n == 1:
+            ax_t.plot([times[3600],times[3600]],[0,scalemax],lw=4,color='k',solid_capstyle='butt',clip_on=False)
 
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
@@ -115,12 +125,11 @@ def run_fig2(pot, n_rows, n_cols, **params):
             amp_line = -amp_line + amp_line.mean()
         else:
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
-        print amp_line
 
         locs_line = pot['loc'][index, 0]
 
         ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_rows, -1)), pot['loc'][:, 0].reshape((n_rows, -1)),
-                            amps.reshape((n_rows, -1)), scalemax*(0.7 ** np.arange(7)), cmap=plt.cm.jet,
+                            amps.reshape((n_rows, -1)), scalemax*(0.7 ** np.arange(7))[::-1], cmap=plt.cm.jet,
                             norm=norm)
         ax1[freq_n].fill([1280, 1280, 1600, 1600], [14000, 15500, 15500, 14000], 'white', edgecolor='white')
 
@@ -137,18 +146,22 @@ def run_fig2(pot, n_rows, n_cols, **params):
         ax3[freq_n] = plt.subplot(gs[freq_n][:, 11:], sharey=ax1[freq_n])
         plt.subplots_adjust(left=0.05, right=0.95)
         if freq_n == 0:
-            plt.bar(bottom=bins[1:-1], width=np.diff(hist) / 1., height=bins[1], left=0, orientation='horizontal',
+            plt.bar(bottom=bins[1:-1]-bins[1], width=np.diff(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal',
                     color='k', edgecolor='w')
             plt.xlabel(u'bif.-term.\n[1/$\mu$m]')
-            plt.xticks(np.arange(-4, 4.1, 2))
+            #plt.xticks(np.arange(-4, 4.1, 2)*1000)
         else:
-            plt.bar(bottom=bins[:-1], width=np.array(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal', color='k',
+            plt.bar(bottom=bins[:-1]-bins[1], width=np.array(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal', color='k',
                     edgecolor='w')
             plt.xlabel('nodes [1/$\mu$m]')
             ax3[freq_n].tick_params(left="off")
-            plt.xticks(np.arange(0, .31, 0.1))
+            #plt.xticks(np.arange(0, .31, 0.1))
+
+        plt.grid(False,axis='both')
         ax3_twin = ax3[freq_n].twiny()
+        ax3_twin.set_xlabel('amplitude [mV]')
         ax3_twin.plot(amp_line, locs_line, lw=2, color='r')
+        plt.grid(False,axis='both')
 
         plt.setp(ax1[freq_n].get_yticklabels(), visible=False)
         plt.setp(ax3[freq_n].get_yticklabels(), visible=False)
@@ -177,6 +190,9 @@ def run_fig2(pot, n_rows, n_cols, **params):
     plt.figtext(0.1, 0.92, 'A', fontsize=24)
     plt.figtext(0.38, 0.92, 'B', fontsize=24)
     plt.figtext(0.77, 0.92, 'C', fontsize=24)
+    plt.figtext(0.1, 0.49, 'D', fontsize=24)
+    plt.figtext(0.38, 0.49, 'E', fontsize=24)
+    plt.figtext(0.77, 0.49, 'F', fontsize=24)
 
     return fig
 
@@ -190,6 +206,7 @@ def run(params_fname):
     fname = "data/bundle_pulse_" + params['postfix'] + ".npz"
     potentials = np.load(fname)
     fig = run_fig2(potentials, n_rows, n_cols, **params)
+    plt.gcf().set_size_inches((6,9))
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/manuscript_fig2_' + params['postfix'] + fmt)
     plt.show()
