@@ -19,8 +19,7 @@ def draw_snip(x0,x1,y,slant):
     plt.plot([x0,x1],[y+2*snip_spacing,y+2*snip_spacing+slant],color='black',lw=1)
 
 pots =  np.load('pots.npz')['pots']
-pots2 = np.load('pots_2.npz')['pots']
-#pots3 = np.load('pots_3.npz')['pots'].sum(axis=1)
+pots2 = np.load('pots_2.npz')['pots'] #pots3 = np.load('pots_3.npz')['pots'].sum(axis=1)
 pots3 = np.load('pots_bifterm.npz')['pots']
 pots4 = np.load('pots_3_sum.npz')['pots']
 scale = 50.
