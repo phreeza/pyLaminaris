@@ -4,6 +4,9 @@ import neuron
 neuron.load_mechanisms('neuron')
 from neuron import h
 
+#we use the brian2 unit system
+from brian2.units import um, cm2, um2, mamp, get_dimensions
+
 
 def _rotation(theta):
     R = np.zeros((3, 3))
@@ -65,7 +68,7 @@ class Segment:
         self._sections_setup()
 
         self.comps = np.array([comp for n in self.sections for comp in n.allseg()])
-        self.comp_areas = np.array([c.area() for c in self.comps])
+        self.comp_areas = np.array([c.area() for c in self.comps])*um2
         self.comps = self.comps[self.comp_areas > 0]
         self.comp_areas = self.comp_areas[self.comp_areas > 0]
         self.ncomps = len(self.comps)
@@ -98,7 +101,6 @@ class Segment:
         diam_myelin = 1.3
         diam_node = 1.3
 
-        area_node = np.pi * L_node * diam_node * 1.e-8  # in cm^2
         for sec in self.myelin:
             sec.nseg = 10
             sec.L = L_myelin
@@ -262,13 +264,15 @@ class Tree:
             # TODO: here is where we need to differentiate record or not.
             # FIXME: Should be failing a test!!!!
             if s.record:
-                imem.extend(s.rec_i_mem * s.comp_areas[:, np.newaxis])
+                imem.extend((s.rec_i_mem * (mamp/cm2) * s.comp_areas[:, np.newaxis])/mamp)
             else:
-                imem.extend(s.get_instantaneous_imem())
+                imem.extend(s.get_instantaneous_imem() * (mamp/cm2) * s.comp_areas/mamp)
             loc.extend(s.node_locations)
+
+        assert get_dimensions(imem[0]).is_dimensionless
         imem = [np.array(i) for i in imem]
 
-        return np.array(imem), np.array(loc)
+        return np.array(imem)*mamp, np.array(loc)*um
 
     def draw_2d(self, alpha=1.0, color='b'):
         from matplotlib import pyplot as plt

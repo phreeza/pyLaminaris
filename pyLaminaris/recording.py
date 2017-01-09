@@ -1,10 +1,13 @@
 __author__ = 'mccolgan'
 import numpy as np
 
+from brian2.units import siemens,meter,um,mamp,mvolt
+from brian2.units import dot,get_dimensions
+
 
 class Electrode:
     def __init__(self, location, node_locs=None):
-        self.location = location
+        self.location = location*um
         self.recorded_potential = np.array([])
         if node_locs is not None:
             self.build_dist_coeffs(node_locs)
@@ -13,18 +16,18 @@ class Electrode:
 
     def calc_fields(self,
                     node_locs, node_imem,
-                    conductivity=1. / (330. * 1e4)):  # conductivity in ohm*um
-        node_imem, node_locs = np.vstack(node_imem), np.vstack(node_locs)
+                    conductivity=0.33*siemens/meter):
+        node_imem, node_locs = np.vstack(node_imem/mamp)*mamp, np.vstack(node_locs/um)*um
         if self.dist_coeffs is None:
             self.build_dist_coeffs(node_locs)
 
-        ret = np.dot(node_imem.T, self.dist_coeffs) / conductivity
+        ret = dot(node_imem.T, self.dist_coeffs) / (conductivity)
         self.recorded_potential = ret
 
     def calc_csd(self,
                  node_locs, node_imem,
-                 csd_range=75.):
-        node_imem, node_locs = np.vstack(node_imem), np.vstack(node_locs)
+                 csd_range=75.*um):
+        node_imem, node_locs = np.vstack(node_imem/mamp)*mamp, np.vstack(node_locs/um)*um
         self.csd = np.sum(node_imem[np.abs(self.location - node_locs)[:, 0] < csd_range, :], axis=0) / (csd_range * 2.)
 
 
@@ -58,12 +61,12 @@ class SingleUnitElectrode:
 
     def calc_fields(self,
                     node_locs, node_imem,
-                    conductivity=1. / (330. * 1e4)):  # conductivity in ohm*um
+                    conductivity=0.33*siemens/meter):
         self.recorded_potential = []
         if self.dist_coeffs is None:
             self.build_dist_coeffs(node_locs)
         for imem, dcoef in zip(node_imem, self.dist_coeffs):
-            ret = np.dot(imem.T, dcoef) / conductivity
+            ret = dot(imem.T, dcoef) / conductivity
             self.recorded_potential.append(ret[:, 0])
 
     def calc_csd(self,
