@@ -25,11 +25,11 @@ def get_index(row, col, n_rows, n_cols):
 
 def calc_mua(x, dt=0.0025, f_hp=2000., f_lp=500.):
     b, a = signal.butter(3, 2 * f_hp * dt / 1000., btype='highpass')
-    raw = signal.lfilter(b, a, x, axis=1)
+    raw = signal.filtfilt(b, a, x, axis=1)
     ret = raw.copy()
     ret[ret < 0.] = 0.
     b, a = signal.butter(3, 2 * f_lp * dt / 1000., btype='lowpass')
-    mua = signal.lfilter(b, a, ret, axis=1)
+    mua = signal.filtfilt(b, a, ret, axis=1)
     return mua,raw
 
 
@@ -54,7 +54,7 @@ def run_fig2(pot, n_rows, n_cols, **params):
     for freq_n in range(2):
         if freq_n == 0:
             b, a = signal.butter(3, 2 * filt_freq * dt / 1000., btype=filter_type[freq_n])
-            fted = signal.lfilter(b, a, raw_pot, axis=1)
+            fted = signal.filtfilt(b, a, raw_pot, axis=1)
         else:
             fted,raw = calc_mua(raw_pot)
         ax1[freq_n] = plt.subplot(gs[freq_n][:, :5])
@@ -94,8 +94,8 @@ def run_fig2(pot, n_rows, n_cols, **params):
             l = jittered_line(s, e)
             ax1[freq_n].plot(l[1], l[0], color='k', alpha=1.0, lw=0.5)
         if freq_n == 0:
-            ax1[freq_n].plot([230+770,230+770],[15550,16050],lw=4,color='k',solid_capstyle='butt')
-            ax1[freq_n].text(300+770,16050,'500 um',clip_on=False)
+            ax1[freq_n].plot([230+770,230+770],[15850,16350],lw=4,color='k',solid_capstyle='butt')
+            ax1[freq_n].text(300+770,16350,'500 um',clip_on=False)
         times = np.arange(0., 20., dt)
         locs = []
         for n in range(10):
@@ -120,11 +120,10 @@ def run_fig2(pot, n_rows, n_cols, **params):
                 # plt.fill([0,100,100,0],[0,0,100000,100000],'k')
         if freq_n == 1:
             ax_t.plot([times[-2000],times[-2000]],[0,scalemax],lw=4,color='k',solid_capstyle='butt',clip_on=False)
-            ax_t.plot([times[-2000],times[-2000]+3.],[0,0],lw=4,color='k',solid_capstyle='butt',clip_on=False)
-            ax_t.text(times[-2000],0.3*scalemax,'0.75 mV',clip_on=False)
-            ax_t.text(times[-2000],-0.3*scalemax,'3 ms',clip_on=False)
+            ax_t.plot([times[-2000],times[-2000]+1.],[0,0],lw=4,color='k',solid_capstyle='butt',clip_on=False)
             ax_t.set_ylim(0,scalemax)
             ax_t.set_xlim(times[3500],times[-2499])
+            print times[-2000]
 
         amps = fted[:, 3500:-2500].max(axis=1) - fted[:, 3500:-2500].min(axis=1)
 
@@ -137,6 +136,7 @@ def run_fig2(pot, n_rows, n_cols, **params):
             amp_line = np.array([np.abs(fted[n, ft_abs[n, :].argmax()]) for n in index])
 
         locs_line = pot['loc'][index, 0]
+        offset_line = pot['loc'][index, 1]
 
         ax1[freq_n].contour(pot['loc'][:, 1].reshape((n_rows, -1)), pot['loc'][:, 0].reshape((n_rows, -1)),
                             amps.reshape((n_rows, -1)), scalemax*(0.7 ** np.arange(7))[::-1], cmap=plt.cm.jet,
@@ -145,6 +145,8 @@ def run_fig2(pot, n_rows, n_cols, **params):
 
         locs = np.array(locs)
         node_locs = np.vstack(node_locs)
+        #TODO: try this with seaborn
+        plt.arrow(offset_line[0],locs_line[0]-100,0,100.)
         ax1[freq_n].axis('off')
         ax1[freq_n].set_aspect('equal', 'datalim')
         ax1[freq_n].set_xlim(-100, 1300)
@@ -159,19 +161,14 @@ def run_fig2(pot, n_rows, n_cols, **params):
         if freq_n == 0:
             plt.bar(bottom=bins[1:-1]-bins[1], width=np.diff(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal',
                     color='#2A6AFF', edgecolor='w')
+            plt.xlabel(u'bif.-term.\n[1/$\mu$m]')
             #plt.xticks(np.arange(-4, 4.1, 2)*1000)
-            ax3[freq_n].plot([.25,1.25],[14000,14000],lw=4,color='k',solid_capstyle='butt',clip_on=False)
-            ax3[freq_n].text(.2,13930,"1 node/$\mu m^2$",clip_on=False,color='#2A6AFF')
-            ax3[freq_n].text(.2,13800,"4 mV",clip_on=False)
         else:
             plt.bar(bottom=bins[:-1]-bins[1], width=np.array(hist) / (float(bins[1])*params['population_size']), height=bins[1], left=0, orientation='horizontal', color='green',
                     edgecolor='w')
             plt.xlabel('nodes [1/$\mu$m]')
             ax3[freq_n].tick_params(left="off")
             #plt.xticks(np.arange(0, .31, 0.1))
-            ax3[freq_n].plot([1,3],[16200,16200],lw=4,color='k',solid_capstyle='butt',clip_on=False)
-            ax3[freq_n].text(1,16130,"2 node/$\mu m$",clip_on=False,color='green')
-            ax3[freq_n].text(1,16000,"1.5 mV",clip_on=False)
 
         ax3[freq_n].axis('off')
         ax3[freq_n].plot(amp_line/scale_amps[freq_n], locs_line, lw=2, color='k')

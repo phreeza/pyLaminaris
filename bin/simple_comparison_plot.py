@@ -26,13 +26,6 @@ scale = 50.
 scale2 = scale*8
 scale3 = scale*300
 scale4 = scale*10
-window = np.exp(-(np.arange(1000)-500.)**2/2.**2)
-window /= window.sum()
-window = window*5
-
-window2 = np.exp(-(np.arange(1000)-500.)**2/2.**2)
-window2 /= window2.sum()
-window2 = window2*5
 
 axes_w = 0.1
 axes_h = 0.52
@@ -177,24 +170,24 @@ draw_snip(-10,10,1820,15)
 plt.xlim(-45,45)
 plt.axis('off')
 
-plt.subplot(258,sharey=ax1)
-csd = -np.diff(np.diff(pots4,axis=0),axis=0)
-m = np.max(np.abs(csd))
-plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(0,5,-12000,10000))
-plt.xlim(1.4,1.9)
-plt.axis('off')
+#plt.subplot(258,sharey=ax1)
+#csd = -np.diff(np.diff(pots4,axis=0),axis=0)
+#m = np.max(np.abs(csd))
+#plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(0,5,-12000,10000))
+#plt.xlim(1.4,1.9)
+#plt.axis('off')
+#
+#ax3 = plt.subplot(257,sharey=ax1)
+#ax3.eventplot(np.array([[1.5,1.5,1.5]]).T, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
+#              linelengths=[150,150,150])
+#for n in range(88,120,4):
+#    plt.plot(np.arange(pots4.shape[1])*0.0025,pots4[n,:].T/(scale3)-(n-100)*100.,color='black')
+#plt.xlim(1.4,1.9)
+#plt.ylim(-2000,2100)
+#plt.axis('off')
 
-ax3 = plt.subplot(257,sharey=ax1)
-ax3.eventplot(np.array([[1.5,1.5,1.5]]).T, colors=c, lineoffsets=(2000.-160.*np.arange(1,4)),
-              linelengths=[150,150,150])
-for n in range(88,120,4):
-    plt.plot(np.arange(pots4.shape[1])*0.0025,pots4[n,:].T/(scale3)-(n-100)*100.,color='black')
-plt.xlim(1.4,1.9)
-plt.ylim(-2000,2100)
-plt.axis('off')
-
-add_scalebar(ax3,sizex=.2,sizey=2e6/(scale3),matchx=False,matchy=False,labelx='0.2 ms',
-        labely='2 mV',loc=8,bbox_to_anchor=(120.5,20.0))
+#add_scalebar(ax3,sizex=.2,sizey=2e6/(scale3),matchx=False,matchy=False,labelx='0.2 ms',
+#        labely='2 mV',loc=8,bbox_to_anchor=(120.5,20.0))
 
 from pyLaminaris import helper
 import glob
@@ -245,13 +238,13 @@ plt.plot(ttimes,160.*3./2.*pulse(ttimes+10)+2000.-4*160,color='gray')
 add_scalebar(ax4,sizex=5,sizey=4e5/(scale4),matchx=False,matchy=False,labelx='5 ms',
         labely='0.4 mV',loc=8,bbox_to_anchor=(220.5,20.0))
 
-plt.subplot(2,5,10,sharey=ax1)
-csd = -np.diff(np.diff(ret3,axis=0),axis=0)
-m = np.max(np.abs(csd[80:,2000:]))
-plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(-10,10,-12000,10000))
-#plt.xlim(-2.4,3.6)
-plt.xlim(-5,5)
-plt.axis('off')
+#plt.subplot(2,5,10,sharey=ax1)
+#csd = -np.diff(np.diff(ret3,axis=0),axis=0)
+#m = np.max(np.abs(csd[80:,2000:]))
+#plt.imshow(csd,vmin=-m,vmax=m,interpolation='nearest',origin='upper',aspect='auto',extent=(-10,10,-12000,10000))
+##plt.xlim(-2.4,3.6)
+#plt.xlim(-5,5)
+#plt.axis('off')
 
 plt.ylim(-2000,2100)
 
