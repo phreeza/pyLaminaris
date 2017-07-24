@@ -52,7 +52,7 @@ class SingleUnitElectrode:
     sped up simulations in which only a single spike per fiber is simulated."""
 
     def __init__(self, location, node_locs=None):
-        self.location = location
+        self.location = location*um
         self.recorded_potential = np.array([])
         if node_locs is not None:
             self.build_dist_coeffs(node_locs)
@@ -71,7 +71,7 @@ class SingleUnitElectrode:
 
     def calc_csd(self,
                  node_locs, node_imem,
-                 csd_range=50.):
+                 csd_range=50.*um):
         self.csd = []
         self.n_nodes = []
         for imem, iloc in zip(node_imem, node_locs):
@@ -88,3 +88,13 @@ class SingleUnitElectrode:
                         4. * np.pi * np.sqrt(np.sum((xl - self.location) * (xl - self.location)))
                     )
                 )
+
+class IntracellularElectrode:
+
+    def __init__(self, compartment):
+        import neuron
+        neuron.load_mechanisms('neuron')
+        from neuron import h
+        self.recorded_potential = h.Vector()
+        self.recorded_potential.record(compartment(0.5)._ref_v)
+

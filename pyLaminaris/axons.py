@@ -109,7 +109,7 @@ class Segment:
             sec.insert('leak')
             sec.insert('extracellular')
 
-            sec.erev_leak = -20.
+            sec.erev_leak = -72.
             sec.g_leak = 1e-6
             # sec.g_pas = 5.60e-9*l2a(sec.diam) # end up as S/cm2
             sec.cm = 1e-3  # 1.87e-11*l2a(sec.diam)*1e6 # end up as uF/cm2
@@ -125,10 +125,11 @@ class Segment:
             sec.insert('klva')
             sec.insert('khva')
             sec.insert('extracellular')
-            if n == 0:
-                sec.gnabar_nahh = 2.4
-            else:
-                sec.gnabar_nahh = .8
+            #if n == 0:
+            #    sec.gnabar_nahh = 2.4
+            #else:
+            #    sec.gnabar_nahh = .8
+            sec.gnabar_nahh = 2.4
             # sec.gnabar_na = .8*(self.order+1)
             # sec.alphahVHalf_na = -58.
             # sec.betahVHalf_na = -58.

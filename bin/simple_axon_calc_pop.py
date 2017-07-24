@@ -16,5 +16,5 @@ csd = np.array([e.csd for e in expt.electrodes])
 n_nodes = np.array([e.n_nodes for e in expt.electrodes])
 uid = str(int(np.random.random()*1000))
 assert get_dimensions(pots).is_dimensionless
-np.savez('pots_3_'+uid,pots=pots,csd=csd,n_nodes=n_nodes)
-np.savez('pots_3_sum_'+uid,pots=pots.sum(axis=1),csd=csd.sum(axis=1))
+np.savez('pots_pop_'+uid,pots=pots,csd=csd,n_nodes=n_nodes)
+np.savez('pots_pop_sum_'+uid,pots=pots.sum(axis=1),csd=csd.sum(axis=1))

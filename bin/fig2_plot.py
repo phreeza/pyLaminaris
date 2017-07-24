@@ -226,6 +226,7 @@ def run(params_fname):
     for fmt in ['.png', '.pdf']:
         fig.savefig('figs/manuscript_fig2_' + params['postfix'] + fmt)
 
+    plt.show()
 
 if __name__ == '__main__':
     run(sys.argv[-1])

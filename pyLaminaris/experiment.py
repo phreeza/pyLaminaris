@@ -6,6 +6,10 @@ class Experiment:
         self.populations = []
         self.neurons = []
         self.electrodes = []
+        self.intracellular_electrodes = []
+
+    def add_intracellular_electrode(self, electrode):
+        self.intracellular_electrodes.append(electrode)
 
     def add_electrode(self, electrode):
         self.electrodes.append(electrode)
